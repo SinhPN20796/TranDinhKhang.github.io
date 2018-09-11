@@ -59,11 +59,11 @@
 }
 @font-face {
     font-family: "Helvetica Neue Medium";
-    src: url({{ STATIC_URL }}fonts/helveticaneuemedium.ttf) format("truetype");
+    src: url(../fonts/helveticaneuemedium.ttf) format("truetype");
 }
 @font-face {
     font-family: "Helvetica Neue Bold";
-    src: url({{ STATIC_URL }}fonts/helveticaneuebold.ttf) format("truetype");
+    src: url(../fonts/helveticaneuebold.ttf) format("truetype");
 }
 body{
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
@@ -83,7 +83,6 @@ body{
 }
 #position-chart-left{
     border-radius: 3px;
-    {#background-color: #ffffff;#}
     max-width:300px;
     min-width: 300px;
 }
@@ -176,6 +175,15 @@ body{
   text-align: left;
   color: #666666;
 }
+.table-text-email{
+  font-size: 10px;
+  text-align: left;
+  color: #666666;
+}
+.table-assign{
+    padding: 4px 5px 5px 5px;
+    list-style-type: none;
+}
 #strategymap-2 table tbody tr td {
   line-height:unset!important;;
 }
@@ -187,7 +195,6 @@ body{
 .btn-multiselect{
     margin-left:10px;
     margin-right:15px;
-    {#width:70px;#}
     height:20px;
     padding:0px 5px;
     display:inline-block;
@@ -445,9 +452,6 @@ text-decoration: underline;
     border: solid 1px rgba(245, 166, 35, 0.5);
     color:#f5a623;
 }
-{#.node .title{#}
-{#    border-bottom:1px solid rgba(171,171,171, 0.2);#}
-{#}#}
 .node.position-level-null.focused {
 	border-width: 2px !important;
 }
