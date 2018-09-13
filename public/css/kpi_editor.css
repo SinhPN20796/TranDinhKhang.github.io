@@ -4506,19 +4506,6 @@ button.close{
     float: left;
     cursor: pointer !important;
 }
-#complate-review-modal .text-alert-assign {
-    border-right: 2px solid #e7e7e7;
-}
-
-#complate-review-modal .text-alert-assign-1 {
-    text-align: right;
-    padding: 9px 0px 0px 0px;
-}
-
-#complate-review-modal .material-icons font_30 {
-    font-size: 30px;
-}
-
 #option-choose-kpi .nav-tabs>li.active>button{
     background-color: transparent;
     color: #008b8b;

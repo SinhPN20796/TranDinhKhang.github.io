@@ -1659,7 +1659,8 @@ a:hover {
     position: relative;
     bottom: -4px;
     margin-top: -9px;
-    color: #007777;
+    color: #008b8b;
+<<<<<<< HEAD
 }
 
 .material-icons.font-20.warning {
@@ -1668,6 +1669,8 @@ a:hover {
     bottom: -4px;
     margin-top: -9px;
     color: #d64f00;
+=======
+>>>>>>> 4334_dxg_staff_completed_the_assessment
 }
 
 .material-icons.font-20.icon-add {
