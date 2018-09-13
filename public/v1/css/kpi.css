@@ -1659,7 +1659,15 @@ a:hover {
     position: relative;
     bottom: -4px;
     margin-top: -9px;
-    color: #008b8b;
+    color: #007777;
+}
+
+.material-icons.font-20.warning {
+    font-size: 20px;
+    position: relative;
+    bottom: -4px;
+    margin-top: -9px;
+    color: #d64f00;
 }
 
 .material-icons.font-20.icon-add {

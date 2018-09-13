@@ -3412,8 +3412,11 @@ var v = new Vue({
         },
 
         complete_review_modal: function () {
-            $('#complate-review-modal').modal();
-            this.count_zero_score_kpi();
+            // $('#complate-review-modal').modal();
+            // this.count_zero_score_kpi();
+            modal_complete_review.complete_review_modal_1(COMMON.UserViewedId, this.organization, this.employee_performance, this.month_1_name,
+                this.month_2_name, this.month_3_name, this.total_weight,this.quarter_by_id);
+
         },
 
         edit_weight_modal: function (){
@@ -3838,7 +3841,7 @@ var v = new Vue({
             that = this;
             $('#complate-review-modal').modal('hide');
             var temp = $('#btn-complete-review').html();
-            $('#btn-complete-review').html(gettext('Downloading! Please wait ... '));
+            $('#btn-complete-review').html(gettext('Đang tải! Vui lòng chờ ... '));
             cloudjetRequest.ajax({
                 type: 'post',
                 url: COMMON.LinkRDisAPI + "?key=confirm-kpi-quarter" + that.quarter_by_id.id,

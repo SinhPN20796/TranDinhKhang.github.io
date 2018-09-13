@@ -4501,10 +4501,24 @@ button.close{
 #evidence .btn-evidences-1[disabled]:hover{
     color:#333!important;
 }
-#complate-review-modal .modal-footer .capture_download_btn{
-    float:left;
-    cursor:pointer!important;
+#complate-review-modal .modal-footer .capture_download_btn {
+    color: #d64f00;
+    float: left;
+    cursor: pointer !important;
 }
+#complate-review-modal .text-alert-assign {
+    border-right: 2px solid #e7e7e7;
+}
+
+#complate-review-modal .text-alert-assign-1 {
+    text-align: right;
+    padding: 9px 0px 0px 0px;
+}
+
+#complate-review-modal .material-icons font_30 {
+    font-size: 30px;
+}
+
 #option-choose-kpi .nav-tabs>li.active>button{
     background-color: transparent;
     color: #008b8b;
@@ -4512,12 +4526,12 @@ button.close{
     margin-top: 4px;
     margin-bottom: 4px;
 }
-#option-choose-lang .nav-tabs>li.active>button{
+#option-choose-lang .btn-group>button.active{
     background-color: #d9eeee;
     border: solid 1px #008b8b;
     color: #008b8b;
 }
-#option-choose-lang .nav-tabs>li.active>button:focus{
+#option-choose-lang .btn-group>button:focus{
     outline: none;
 }
 .btn.btn-normal.btn-tab{
@@ -4967,6 +4981,7 @@ button.close{
     padding-right: 22px;
     max-height:  calc(100vh - 230px);
     overflow: auto;
+    min-height: 200px;
 }
 
 .dropdown-func-cate .el-cascader-menu{
@@ -5145,7 +5160,7 @@ button.close{
     cursor: unset!important;
 }
 #list_kpi_suggest .list-group{
-    max-height: 200px;
+    max-height: 185px;
     overflow: auto;
 }
 #list_kpi_suggest .list-group-item:hover{
