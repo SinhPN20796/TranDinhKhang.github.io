@@ -57,17 +57,6 @@
 	box-shadow: none;
     border: 1px solid rgb(171, 171, 171);
 }
-@font-face {
-    font-family: "Helvetica Neue Medium";
-    src: url(../fonts/helveticaneuemedium.ttf) format("truetype");
-}
-@font-face {
-    font-family: "Helvetica Neue Bold";
-    src: url(../fonts/helveticaneuebold.ttf) format("truetype");
-}
-body{
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-}
 #tab-content .menu .active{
     border-color:#008b8b!important;
     color:#008b8b!important;
@@ -170,17 +159,17 @@ body{
   color: #333333;
   margin-bottom:0px;
 }
-.table-text-small{
+#user-config .table-text-small{
   font-size: 10px;
   text-align: left;
   color: #666666;
 }
-.table-text-email{
+#user-config .table-text-email{
   font-size: 10px;
   text-align: left;
   color: #666666;
 }
-.table-assign{
+#user-config .table-assign{
     padding: 4px 5px 5px 5px;
     list-style-type: none;
 }
