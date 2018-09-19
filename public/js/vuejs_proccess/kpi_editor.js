@@ -1244,6 +1244,10 @@ var v = new Vue({
         can_edit_current_month: function (current_month, monthly_review_lock){ //check whether currrent month is allowed to edit
             return monthly_review_lock == "allow_all"?true: current_month==monthly_review_lock
         },
+        is_manager: function(){
+            var is_manager = COMMON.ManagerIdOfVieweedUser == COMMON.UserId;
+            return is_manager
+        },
         disable_review_kpi: function(parent_id, current_month){
             if (this.is_user_system) return false;
             var is_manager = COMMON.UserId != COMMON.UserViewedId;
