@@ -1292,7 +1292,7 @@ var v = new Vue({
             })
         },
 
-        disable_review_kpi: function(parent_id, current_month){
+        disable_review_kpi: function(current_month){
             // Truong hop user hoac quan ly da xac nhan thi khong cho phep chinh sua
             if (this.confirm_complete) {
                 return true;
