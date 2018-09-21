@@ -4501,6 +4501,11 @@ button.close{
 #evidence .btn-evidences-1[disabled]:hover{
     color:#333!important;
 }
+#complate-review-modal .modal-footer .capture_download_btn {
+    color: #d64f00;
+    float: left;
+    cursor: pointer !important;
+}
 #option-choose-kpi .nav-tabs>li.active>button{
     background-color: transparent;
     color: #008b8b;

@@ -774,6 +774,7 @@ function findRootKPI(kpi_id,kpi_list){
 var v = new Vue({
     el: '#container',
     data: {
+        confirm_complete:false,
         evidences: {},
         filename: '',
         action_plan_filename:'',
@@ -998,6 +999,7 @@ var v = new Vue({
             handler: function (val, oldVal) {
                 this.calculate_total_weight();
                 this.getListGroupV2();
+                this.check_disable_result();
                 // this.getListGroup();
             }
             //,deep: true <-- slow
@@ -1248,6 +1250,25 @@ var v = new Vue({
             var is_manager = COMMON.ManagerIdOfVieweedUser == COMMON.UserId;
             return is_manager
         },
+        check_disable_result: function(){
+            var self = this;
+            cloudjetRequest.ajax({
+                type: 'GET',
+                url: `/api/v2/user/${COMMON.UserViewedId}/approve/?month=${self.organization.monthly_review_lock}`,
+                success: function(data){
+                    if (data){
+                       if (self.is_manager() && data.confirmed_date){
+                           self.confirm_complete = true
+                       }else if(!self.is_manager() && data.finished_date ){
+                           self.confirm_complete = true
+                       }else {
+                           self.confirm_complete = false
+                       };
+                    }
+                }
+            })
+        },
+
         disable_review_kpi: function(parent_id, current_month){
             if (this.is_user_system) return false;
             var is_manager = COMMON.UserId != COMMON.UserViewedId;
