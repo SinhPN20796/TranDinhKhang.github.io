@@ -705,6 +705,29 @@ Vue.component('tag-search', {
     }
 });
 
+function setToolTipKPI(el, content){
+    $(el).qtip({
+        content: {
+            text: content.replace(/(?:\r\n|\r|\n)/g, '<br/>')
+        },
+        style: {
+            classes: 'qtip-green'
+        },
+    });
+}
+
+Vue.directive('settooltipkpi', {
+    params: ['content'],
+    paramWatchers: {
+    content: function (val, oldVal) {
+        setToolTipKPI($(this.el),this.params.content);
+    }
+    },
+    bind:function () {
+        setToolTipKPI($(this.el),this.params.content);
+    }
+});
+
 Vue.component('kpi-editable', {
     delimiters: ["${", "}$"],
     props: ['kpi', 'field', 'can_edit'],
@@ -1259,7 +1282,7 @@ var v = new Vue({
                     if (data){
                        if (self.is_manager() && data.confirmed_date){
                            self.confirm_complete = true
-                       }else if(!self.is_manager() && data.finished_date ){
+                       }else if(COMMON.UserId == COMMON.UserViewedId && data.finished_date ){
                            self.confirm_complete = true
                        }else {
                            self.confirm_complete = false
@@ -1270,11 +1293,15 @@ var v = new Vue({
         },
 
         disable_review_kpi: function(parent_id, current_month){
+            // Truong hop user hoac quan ly da xac nhan thi khong cho phep chinh sua
+            if (this.confirm_complete) {
+                return true;
+            }
             if (this.is_user_system) return false;
             var is_manager = COMMON.UserId != COMMON.UserViewedId;
             var current_month_locked = !(this.can_edit_current_month(current_month, this.organization.monthly_review_lock));
             if (is_manager){ // if current Login user is parent of user viewed
-                return ( !this.organization.allow_manager_review || current_month_locked ) // manager can edit if enable_to_edit not pass
+                return ( !this.organization.allow_manager_review || current_month_locked) // manager can edit if enable_to_edit not pass
             }
             else {
                 return ( !this.organization.allow_employee_review || current_month_locked ) // employee can edit(review) kpi only if not pass self_review_date
@@ -2676,28 +2703,29 @@ var v = new Vue({
                 return false;
             }
             return true;
-
-
         },
         check_disable_edit: function (kpi) {
+            // Document permission edit quarter target & kpi target
+            // https://cloudjet.atlassian.net/wiki/spaces/PM/pages/454328403
+
+            // Admin allow edit
             if (this.is_user_system){
-                return true
-            }else{
-                if (!that.organization.allow_edit_monthly_target){
-                    return false
-                }else {
-                    if (COMMON.UserRequestID == COMMON.UserViewedId) {
-                        return false
-                    } else {
-                        if (kpi.enable_edit) {
-                            return true
-                        }
-                    }
-                }
+                return true;
             }
+
+            // Disable when the organization didn't allow to edit month target
+            if (!that.organization.allow_edit_monthly_target){
+                return false;
+            }
+
+            // Enable when the kpi allows to edit
+            if (kpi.enable_edit) {
+                return true;
+            }
+
+            // Otherwise disabled
             return false
         },
-
 
         showPreview: function (file_url) {
             if (window.location.protocol == 'https:' && file_url.match('^http://'))
@@ -2767,7 +2795,8 @@ var v = new Vue({
                     contentType: false,
                     success: function (response) {
                         console.log(response);
-                        alert('Post action plan successfully!');
+                        var mesage = gettext("Post action plan successfully!");
+                        alert(mesage);
                         // The unshift() method adds new items to the beginning of an array, and returns the new length.
                         that.list_action_plan_file.unshift(response);
                         // that.list_action_plan_file[0].avatar = COMMON.UserAvatar;
