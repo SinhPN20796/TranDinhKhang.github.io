@@ -933,6 +933,7 @@ var v = new Vue({
         //datatemp for kpilib
         visible: false,
         // end data temp for kpi lib
+        postponed_button: true,
     },
     validators: {
         numeric: { // `numeric` custom validator local registration
@@ -4194,6 +4195,7 @@ var v = new Vue({
                     that.kpi_list = dictResult;
                     // that.parentKPIs = JSON.parse(JSON.stringify(dictResult));
                     console.log(that.kpi_list);
+                    that.postponed_button = false
                 },
                 error: function (a, b, c) {
 
