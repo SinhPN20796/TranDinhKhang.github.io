@@ -770,6 +770,7 @@ Vue.component('kpi-editable', {
                 data: JSON.stringify(data),
                 success: function (data) {
                     _this.kpi[_this.field] = data[_this.field];
+                    _this.kpi['is_approved'] = data['is_approved'];
                 }
             })
 
@@ -1068,12 +1069,6 @@ var v = new Vue({
         }
     },
     created: function(){
-        try{
-            ELEMENT.locale(ELEMENT.lang[COMMON.LanguageCode]);
-        }
-        catch (e){
-            console.log(e);
-        }
     },
     methods: {
         getKPIParent: function(){
@@ -3442,11 +3437,13 @@ var v = new Vue({
                             that.$set('kpi_list[' + kpi.id + '].latest_score', data.score)
                             that.$set('kpi_list[' + kpi.id + '].real', data.real)
 
+                            that.$set('kpi_list[' + kpi.id + '].is_approved', data.kpi.is_approved);
+                            that.$set('kpi_list[' + kpi.id + '].operator', data.kpi.operator);
+
                             that.kpi_list[kpi.id].latest_score = data.score; //JSON.parse(data);
                             that.kpi_list[kpi.id].real = data.real; //JSON.parse(data);
                             that.get_current_employee_performance();
                             that.triggeredReloadTargetPerformance(kpi.id)
-
                             success_requestcenter(gettext("Update successful!"));
                         },
                         error: function () {
