@@ -427,3 +427,12 @@ $.ajaxSetup({
         }
     }
 });
+
+
+function datetime(date){
+	// datetime format
+    var date = new Date();
+    var datetime = moment(date).format("HH:mm:ss  DD/MM/YYYY");
+    return datetime;
+
+};
