@@ -3283,3 +3283,19 @@ input[type="checkbox"] .styled:checked + label::after, input[type="radio"] .styl
 #contain-comment .admin-comment label,.note-content .admin-comment label{
     margin-bottom: 0px;
 }
+
+.evaluation-approval {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+}
+.check-circle-outline {
+    margin: 0px 2px 5px 0px;
+    border-radius: 16px;
+    background-color: #fff;
+    color: #008b8b;
+}
+.btn-evaluation-approval {
+    width: 201px;
+    height: 40px;
+}
