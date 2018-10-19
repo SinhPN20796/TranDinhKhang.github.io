@@ -3579,7 +3579,7 @@ var v = new Vue({
             // $('#complate-review-modal').modal();
             // this.count_zero_score_kpi();
             modal_complete_review.complete_review_modal_1(COMMON.UserViewedId, this.organization, this.employee_performance, this.month_1_name,
-                this.month_2_name, this.month_3_name, this.total_weight,this.quarter_by_id);
+                this.month_2_name, this.month_3_name, this.total_weight,this.quarter_by_id,this.current_quarter);
 
         },
 
