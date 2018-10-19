@@ -429,10 +429,7 @@ $.ajaxSetup({
 });
 
 
-function format_date(){
+function format_date(date){
 	// datetime format
-    var date = new Date();
-    var format_date  = moment(date).format("HH:mm:ss  DD/MM/YYYY");
-    return format_date ;
-
+   return  moment(date).format("HH:mm:ss  DD/MM/YYYY")
 }
