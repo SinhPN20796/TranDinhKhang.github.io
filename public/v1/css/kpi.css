@@ -3296,6 +3296,6 @@ input[type="checkbox"] .styled:checked + label::after, input[type="radio"] .styl
     color: #008b8b;
 }
 #btn-complete-review-editor .btn-evaluation-approval {
-    width: 201px;
+    min-width: 201px;
     height: 40px;
 }
