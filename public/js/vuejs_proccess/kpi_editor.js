@@ -1380,6 +1380,11 @@ var v = new Vue({
         can_edit_current_month: function (current_month, monthly_review_lock){ //check whether currrent month is allowed to edit
             return monthly_review_lock == "allow_all"?true: current_month==monthly_review_lock
         },
+        formatWeight: function (val) {
+                if (typeof val == 'number') {
+                    return val.toFixed(2);
+                }
+            },
         is_manager: function(){
             var is_manager = COMMON.ManagerIdOfVieweedUser == COMMON.UserId;
             return is_manager
