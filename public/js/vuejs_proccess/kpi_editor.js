@@ -1050,6 +1050,7 @@ var v = new Vue({
         // end data temp for kpi lib
         postponed_button: true,
         data_abs_result: {},    // data  used show modal absolute result.
+        kpi_approval: null,
     },
     validators: {
         numeric: { // `numeric` custom validator local registration
@@ -1140,6 +1141,7 @@ var v = new Vue({
                 this.calculate_total_weight();
                 this.getListGroupV2();
                 this.check_disable_result();
+                this.getKPIApproval();
                 // this.getListGroup();
             }
             //,deep: true <-- slow
@@ -2740,6 +2742,8 @@ var v = new Vue({
                     month: month_number,
                 },
                 success: function (response) {
+                    that.is_admin();
+                    that.disable_upload_document();
                     that.$set('list_evidence', response);
                     console.log("stopped here");
                     if (that.list_evidence.length > 0) {
@@ -3045,6 +3049,36 @@ var v = new Vue({
                 that.showModal_kpi_action_plan(); // fucking, this will be request to server again
 
             });
+        },
+        getKPIApproval: function(){    // get data kpi_approval
+            var that = this;
+            cloudjetRequest.ajax({
+                type: 'GET',
+                url: `/api/v2/user/${COMMON.UserViewedId}/approve/?month=${that.organization.monthly_review_lock}`,
+                success: function(data){
+                    that.kpi_approval = data;
+                }
+            })
+        },
+
+        disable_upload_document: function (){      //check disable upload file doi voi NV va QL
+            var self = this;
+            if (!self.kpi_approval) {
+                return false;
+            }
+            if (self.is_admin()) {      // check admin toan quyen upload file
+                return false;
+            }
+            if(self.is_manager() && self.kpi_approval.confirmed_date){  // check quan ly da phe duyet => disable upload file
+                self.disable_upload = true;
+                return true
+            }else if (self.is_user() && self.kpi_approval.finished_date){  // check nhan vien da hoan thanh danh gia => disable upload file
+                self.disable_upload = true;
+                return true
+            } else {
+                self.disable_upload = false;
+                return false
+            }
         },
 
         handleFile:function (e){
