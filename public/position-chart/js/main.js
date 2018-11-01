@@ -2,11 +2,17 @@ var selected_position = Vue.extend({
     type: 'selected_position',
     delimiters: ['${', '}$'],
     template: $('#cjs-component-selected-position').html(),
+    props:['position'],
     data: function () {
         return {
             value: '',
             search_staff: '',
             group_position:[]
+        }
+    },
+    created: function() {
+        if(this.position.id){
+            this.search_staff = this.position.name
         }
     },
     methods:{
@@ -99,6 +105,7 @@ var importKpiPosition = new Vue({
     el: '#import-kpi-position-chart',
     delimiters: ["${", "}$"],
     data:{
+        position_default: position_default_import,
         position_kpi_id:"",
         enable_allocation_target:  false,
         alert_import_kpi: true,
@@ -129,7 +136,6 @@ var importKpiPosition = new Vue({
         },
         method_save: '',
     },
-    created:{},
     filters:{
         trans_method: function (str) {
             if (str == 'sum') {
@@ -682,7 +688,7 @@ var importKpiPosition = new Vue({
                 self.method_save = self.method[p];
             }
             else {
-                self.method_save = self.method[p];
+                self.method_save = "";
                 check_score_calculation_type = false
             }
             kpi.score_calculation_type = self.method_save;
@@ -733,18 +739,29 @@ var importKpiPosition = new Vue({
             if (!kpi.score_calculation_type) {
                 kpi.score_calculation_type = ""
             }
-
             if (!kpi.unit) {
                 kpi.unit = ""
             }
             if (!kpi.measurement) {
                 kpi.measurement = ""
             }
+            if (!kpi.type_kpi) {
+                kpi.type_kpi = ""
+            }
+            if (!kpi.goal) {
+                kpi.goal = ""
+            }
+            if (!kpi.kpi) {
+                kpi.kpi = ""
+            }
+            if (!kpi.operator) {
+                kpi.operator = ""
+            }
             kpi.msg = '';
             self.check_file = true;
             kpi.status = null;
-            var quarter_error = '';// lưu quý bị lỗi
-            var months_error = '';// lưu tháng bị lỗi
+            var quarter_error = [];// mảng lưu quý bị lỗi
+            var months_error = [];// mảng lưu tháng bị lỗi
             kpi.validated = true;
             if (kpi.bsc_category.trim() == '') {
                 kpi.validated = false;
@@ -778,13 +795,13 @@ var importKpiPosition = new Vue({
             scores.forEach(function (score) {
                 kpi[score] = kpi[score]== null?kpi[score]:kpi[score].toString().replace(/,/g, '')
                 if (isNaN(kpi[score])) {
-                    quarter_error += (scores.indexOf(score)+1) + ", "
+                    quarter_error.push(scores.indexOf(score)+1)
                 }
             })
             months.forEach(function (month) {
                 kpi[month] = kpi[month]== null?kpi[month]:kpi[month].toString().replace(/,/g, '')
                 if (isNaN(kpi[month])) {
-                    months_error += (months.indexOf(month)+1) + ", "
+                    months_error.push(months.indexOf(month)+1)
                 }
             })
             if (kpi.msg.trim()[0] == '\n') {
@@ -812,14 +829,14 @@ var importKpiPosition = new Vue({
                 kpi.validated = false;
                 kpi.msg = kpi.msg + "\n" + "Điểm năm" + " không đúng định dạng";
             }
-            if (quarter_error ) {
+            if (quarter_error.length > 0 ) {
                 kpi.validated = false;
-                quarter_error = quarter_error.slice(0, -2) + " " + "không đúng định dạng";
-                kpi.msg = kpi.msg + "\n" + "Điểm quý" + " " + quarter_error;
+                var quarter_error_str = quarter_error.join(', ') + " " + "không đúng định dạng";
+                kpi.msg = kpi.msg + "\n" + "Điểm quý" + " " + quarter_error_str;
             }
-            if (months_error ) {
+            if (months_error.length > 0 ) {
                 kpi.validated = false;
-                months_error = months_error.slice(0, -2) + " " + "không đúng định dạng";
+                var months_error_str = months_error.join(', ') + " " + "không đúng định dạng";
                 kpi.msg = kpi.msg + "\n" + "Điểm tháng" + " " + months_error;
             }
             if (self.enable_allocation_target) {
@@ -905,11 +922,13 @@ var importKpiPosition = new Vue({
             else if (that.method.indexOf(that.data_edit_kpi.data.score_calculation_type.trim().toLowerCase()) > -1) {
                 that.method_save = that.data_edit_kpi.data.score_calculation_type;
                 p = that.method.indexOf(that.data_edit_kpi.data.score_calculation_type.trim().toLowerCase());
-                if (p > 2) {
+                if (p > 2 && p<6) {
                     that.data_edit_kpi.data.score_calculation_type = that.method[p - 3];
                 }
-                if (p < 3) {
+                else if (0 <= p && p<=2) {
                     that.data_edit_kpi.data.score_calculation_type = that.method[p];
+                }else{
+                    that.data_edit_kpi.data.score_calculation_type = ""
                 }
             }
             if (parseFloat(that.data_edit_kpi.data.weight) != NaN) {
@@ -970,7 +989,7 @@ var importKpiPosition = new Vue({
                 current_goal: kpi.measurement,
                 score_calculation_type: kpi.score_calculation_type,
                 operator: kpi.operator,
-                weight: kpi.weight,
+                weight: parseFloat(kpi.weight) || null,
                 kpi_code: kpi.type_kpi,
                 data_source: kpi.data_source,
                 refer_relationship: [],
@@ -1025,25 +1044,10 @@ var importKpiPosition = new Vue({
                 self.method_save = self.method[p];
             }
             else {
-                self.method_save = self.method[p];
+                self.method_save = "";
             }
             kpi.score_calculation_type = that.method_save;
 
-            if (that.to_string(kpi.q1) == '') {
-                kpi.q1 = null;
-            }
-            if (that.to_string(kpi.q2) == '') {
-                kpi.q2 = null;
-            }
-            if (that.to_string(kpi.q3) == '') {
-                kpi.q3 = null;
-            }
-            if (that.to_string(kpi.q4) == '') {
-                kpi.q4 = null;
-            }
-            if (that.to_string(kpi.year) == '') {
-                kpi.year = null;
-            }
             var kpi_data_import = that.convertNewStructData(kpi)
             if(that.position_kpi_id == "") {
                 swal({
@@ -1109,5 +1113,8 @@ var importKpiPosition = new Vue({
         // fetch the data when the view is created and the data is
         // already being observed
         this.init()
+        if(this.position_default.id){
+            this.getPositionKpiId(this.position_default.id)
+        }
     }
 })
