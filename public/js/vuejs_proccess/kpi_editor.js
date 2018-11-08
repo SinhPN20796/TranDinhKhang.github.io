@@ -1109,6 +1109,7 @@ var v = new Vue({
         this.get_surbodinate();
         this.same_user = (COMMON.UserRequestID == COMMON.UserViewedId) ? true : false;  // -> hot fix, has_perm(KPI__EDITING) => actor == target cho phep nhan vien tu chinh sua kpi, nhung logic moi thi khong cho phep
         this.get_surbodinate_user_viewed();
+        $('#emp_title').tooltip();
 
     },
     filters: {
@@ -2120,31 +2121,42 @@ var v = new Vue({
             }
             return moment(time).format('HH:mm:ss DD/MM/YYYY');
         },
-        check_quarter_plan: function (kpi_id, type) {
+        check_quarter_plan: function (kpi_id) {
             var that = this;
-            var quarter = "one";
-            switch (that.current_quarter.quarter) {
-                case 1:
-                    quarter = "one";
-                    break;
-                case 2:
-                    quarter = "two";
-                    break;
-                case 3:
-                    quarter = "three";
-                    break;
-                case 4:
-                    quarter = "four"
-                    break;
-                default:
-                    break;
-            }
-            var quarter_plan = that.kpi_list[kpi_id]['quarter_' + quarter + '_target'];
-            var month_1_target = that.kpi_list[kpi_id].month_1_target ? that.kpi_list[kpi_id].month_1_target : 0;
-            var month_2_target = that.kpi_list[kpi_id].month_2_target ? that.kpi_list[kpi_id].month_2_target : 0;
-            var month_3_target = that.kpi_list[kpi_id].month_3_target ? that.kpi_list[kpi_id].month_3_target : 0;
-            var actual_target = parseFloat((month_1_target + month_2_target + month_3_target).toFixed(5));
+            var quarter_obj = {
+                1:"one",
+                2:"two",
+                3:"three",
+                4:"four"
+            };
+            var quarter_plan = parseFloat(that.kpi_list[kpi_id]['quarter_' + quarter_obj[that.current_quarter.quarter] + '_target'].toFixed(2));
+            var month_1_target = parseFloat(that.kpi_list[kpi_id].month_1_target) || null;
+            var month_2_target = parseFloat(that.kpi_list[kpi_id].month_2_target) || null;
+            var month_3_target = parseFloat(that.kpi_list[kpi_id].month_3_target) || null;
+            var actual_target = parseFloat((month_1_target + month_2_target + month_3_target).toFixed(2));
             return that.kpi_list[kpi_id].score_calculation_type == 'sum' && (that.kpi_list[kpi_id].target != quarter_plan || that.kpi_list[kpi_id].target != actual_target);
+        },
+        check_average: function (kpi_id) {
+            var that = this;
+            var quarter_obj = {
+                1:"one",
+                2:"two",
+                3:"three",
+                4:"four"
+            };
+            var quarter_plan = parseFloat(that.kpi_list[kpi_id]['quarter_' + quarter_obj[that.current_quarter.quarter] + '_target'].toFixed(2));
+            var month_1_target = parseFloat(that.kpi_list[kpi_id].month_1_target) || null;
+            var month_2_target = parseFloat(that.kpi_list[kpi_id].month_2_target) || null;
+            var month_3_target = parseFloat(that.kpi_list[kpi_id].month_3_target) || null;
+            var count = null;
+            [1,2,3].forEach(function (index) {
+                count = that.kpi_list[kpi_id]['month_'+ index + '_target'] == null ? count : count+1;
+                return count
+            });
+            var average_target = parseFloat(((month_1_target + month_2_target + month_3_target)/count).toFixed(2));
+            if(that.kpi_list[kpi_id].score_calculation_type == 'average' && (that.kpi_list[kpi_id].target != quarter_plan || that.kpi_list[kpi_id].target != average_target)){
+                return true;
+            }
         },
         kpi_ready: function (kpi_id, controller_prefix, ready) {
             kpi_ready(kpi_id, controller_prefix, ready);
@@ -4254,7 +4266,7 @@ var v = new Vue({
                     that.update_score(kpi);
                     break;
                 case 'month_target':
-                    that.update_month_target(kpi, (!kpi.enable_edit && !that.organization.allow_edit_monthly_target) || kpi.score_calculation_type == 'average');
+                    that.update_month_target(kpi,(!kpi.enable_edit && !that.organization.allow_edit_monthly_target));
                     break;
                 case 'score_calculation':
                     that.update_quarter_target(kpi);
