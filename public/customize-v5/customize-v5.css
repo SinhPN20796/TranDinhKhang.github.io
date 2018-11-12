@@ -361,18 +361,12 @@ img.icon{
     padding-bottom: 5px;
 }
 .team-member-email {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
     font-size: 14px;
     text-align: left;
     color: #666666;
 }
 
 .team-member-function {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
     font-size: 14px;
     text-align: left;
     color: #666666;
@@ -554,7 +548,4 @@ img.icon{
 }
 .position-relative{
     position: relative;
-}
-.hover-tooltip {
-    display: inline-grid;
 }
