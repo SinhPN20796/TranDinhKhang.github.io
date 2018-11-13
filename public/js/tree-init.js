@@ -328,7 +328,7 @@ function get_subordinate(node) {
 function bind_new_person() {
     $('#add-save-new-person').unbind('click');
     $(".pass-control").show();
-    $("#id_send_new_pass").prop('checked', true);
+    $("#id_send_new_pass").prop('checked', false);
     $('#add-save-new-person').enable(true);
     $('#add-save-new-person').click(function () {
         if (!valid_input()) {
