@@ -3,49 +3,34 @@ var node_id = null;
 var language = 'VN';
 var node_old_active = true;
 function valid_input() {
-	var message = [];
-	var elms = [];
-	if($("#id-employee-name-edit").val().trim().length == 0) {
-		message.push(gettext("Full name field cannot be empty or name's format is not correct"));
-		elms.push("#id-employee-name-edit");
+    var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
+    var isError = false;
+	$(".error-msg").hide();
+	if ($('#id-employee-name-edit').val().trim() == '') {
+		$('#msg-name-up').show();
+		    isError = true;
     }
 	
-    if ($('#id-email-employee-edit').val() == ''){
-    	message.push(gettext('Email field is required.'));
-    	elms.push('#id-email-employee-edit');
+    if (!pattern.test($('#id-email-employee-edit').val())){
+        $('#msg-invalid-email-up').show();
+            isError = true;
     }
     
-    if ($('#id-position-edit').val() == ''){
-    	message.push(gettext('Position field is required.'));
-    	elms.push('#id-position-edit');
-    }
-    
-    if (message.length > 0) {
-    	alert(message.join("\n"));
-    	$(elms[0]).focus();
-    	return false;
-    }
-    
-    var pattern = new RegExp(/^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i);
-    if (!pattern.test($('#id-email-employee-edit').val())) {
-        alert(gettext('Enter a valid E-mail address.'));
-        $('#id-email-employee-edit').focus();
-        return false;
-    }
-    
-    if(!isFinite($("#id-employee-phone-edit").val()) && $("#id-employee-phone-edit").val().length>0){
-        $("#id-employee-phone-edit").focus();
-        alert(gettext("Phone's format is not correct"));
-        return false;
+    if ($('#id-position-edit').val().trim() == ''){
+    	$('#msg-invalid-position-edit').show();
+    	    isError = true;
     }
 
     if(peopleApp.emp_status == 0 && $("#id-employee-reason").val().length == 0
         && node_old_active == '1'){
+        $('#msg-reason-up').show();
+    	    isError = true;
+    }
 
-        $("#id-employee-reason").focus();
-        alert(gettext("Please input reason delay"));
+    if(isError){
         return false;
     }
+
     return true;
 }
 
@@ -146,6 +131,10 @@ function load_data_update(node){
     $("#id-employee-edit").val(node.data.employee_code);
     $("#id-employee-phone-edit").val(node.data.phone);
     $("#id-employee-skype-edit").val(node.data.skype);
+    $('#msg-name-up').hide();
+    $('#msg-empty-email-up').hide();
+    $('#msg-invalid-email-up').hide();
+    $('.error-msg').hide();
     if (node.data.active) {
     	$("#emp_active_1").click();
     } else {
