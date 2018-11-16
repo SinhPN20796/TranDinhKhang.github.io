@@ -10,7 +10,7 @@ function valid_input() {
 		$('#msg-name-up').show();
 		    isError = true;
     }
-	
+
     if (!pattern.test($('#id-email-employee-edit').val())){
         $('#msg-invalid-email-up').show();
             isError = true;
