@@ -135,7 +135,7 @@ function load_data_update(node){
     $("#id-employee-phone-edit").val(node.data.phone);
     $("#id-employee-skype-edit").val(node.data.skype);
     $('#msg-name-up').hide();
-    $('#msg-empty-email-up').hide();
+    $('#msg-duplicate-email').hide();
     $('#msg-invalid-email-up').hide();
     $('#msg-invalid-position-edit').hide();
     $('#add-employee-modal.error-msg').hide();
@@ -216,6 +216,9 @@ function update_info(node) {
         },
         error: function (jqXHR, textStatus, errorThrown) {
             $("#id-edit-save").enable(true);
+            if ($('#id-email-employee-edit').val()){
+                $('#msg-duplicate-email').show();
+            }
         }
     });
 }
@@ -286,20 +289,19 @@ function remove_person(node, delete_kpis) {
             },
             success: function (data) {
                 if (typeof data == 'object' && data.status == "ok") {
-
-                    if (parent_node) {
-                        // load_data_node(parent_node);
-                        // st.onClick(parent_node.id);
-                        init_node(parent_node);
-                    }
-
-                    peopleApp.get_list_backup_user();
-
                     st.removeSubtree(node.id, true, 'animate', {
                         hideLabels: false,
                         onComplete: function () {
                         }
                     });
+
+                    if (parent_node) {
+                        // load_data_node(parent_node);
+                        st.onClick(parent_node.id); // Don't remove this if you don't know what you do
+                        init_node(parent_node);
+                    }
+
+                    peopleApp.get_list_backup_user();
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -331,6 +333,7 @@ function get_subordinate(node) {
 
 function bind_new_person() {
     $('#add-save-new-person').unbind('click');
+    $('#msg-duplicate-email').hide();
     $(".pass-control").show();
     $("#id_send_new_pass").prop('checked', false);
     $('#add-save-new-person').enable(true);
@@ -388,7 +391,9 @@ function bind_new_person() {
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 $("#add-save-new-person").enable(true);
-                alert(gettext("Data error"));
+                if ($('#id-email-employee-edit').val()){
+                    $('#msg-duplicate-email').show();
+                }
             }
         });
     });

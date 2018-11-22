@@ -3384,15 +3384,15 @@ var v = new Vue({
                 //console.log('#loading-gif' + kpi.id)
 //                $('#loading-gif' + kpi.id).toggleClass('loading-gif');
 
-                that.$set('kpi_list[' + kpi.id + '].month_1_target', kpi.month_1_target != '' ? kpi.month_1_target : kpi.get_target)
-                that.$set('kpi_list[' + kpi.id + '].month_2_target', kpi.month_2_target != '' ? kpi.month_2_target : kpi.get_target)
-                that.$set('kpi_list[' + kpi.id + '].month_3_target', kpi.month_3_target != '' ? kpi.month_3_target : kpi.get_target)
-                if (that.kpi_list[kpi.id].score_calculation_type == 'sum') {
-                    var month_1_target = kpi.month_1_target ? kpi.month_1_target : 0;
-                    var month_2_target = kpi.month_2_target ? kpi.month_2_target : 0;
-                    var month_3_target = kpi.month_3_target ? kpi.month_3_target : 0;
-                    that.$set('kpi_list[' + kpi.id + '].target', month_1_target + month_2_target + month_3_target)
-                }
+                // that.$set('kpi_list[' + kpi.id + '].month_1_target', kpi.month_1_target != '' ? kpi.month_1_target : kpi.get_target)
+                // that.$set('kpi_list[' + kpi.id + '].month_2_target', kpi.month_2_target != '' ? kpi.month_2_target : kpi.get_target)
+                // that.$set('kpi_list[' + kpi.id + '].month_3_target', kpi.month_3_target != '' ? kpi.month_3_target : kpi.get_target)
+                // if (that.kpi_list[kpi.id].score_calculation_type == 'sum') {
+                //     var month_1_target = kpi.month_1_target ? kpi.month_1_target : 0;
+                //     var month_2_target = kpi.month_2_target ? kpi.month_2_target : 0;
+                //     var month_3_target = kpi.month_3_target ? kpi.month_3_target : 0;
+                //     that.$set('kpi_list[' + kpi.id + '].target', month_1_target + month_2_target + month_3_target)
+                // }
 
                 //console.log(that.kpi_list[kpi.id].month_2_target);
 
@@ -4109,7 +4109,7 @@ var v = new Vue({
                     that.update_score(kpi);
                     break;
                 case 'month_target':
-                    that.update_month_target(kpi, (!kpi.enable_edit && !that.organization.allow_edit_monthly_target) || kpi.score_calculation_type == 'average');
+                    that.update_month_target(kpi, (!kpi.enable_edit && !that.organization.allow_edit_monthly_target));
                     break;
                 case 'score_calculation':
                     that.update_quarter_target(kpi);
