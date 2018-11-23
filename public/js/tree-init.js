@@ -13,6 +13,7 @@ function valid_input() {
 
     if (!pattern.test($('#id-email-employee-edit').val())){
         $('#msg-invalid-email-up').show();
+        $('#msg-duplicate-email').hide();
             isError = true;
     }
     
@@ -394,6 +395,9 @@ function bind_new_person() {
                 if ($('#id-email-employee-edit').val()){
                     $('#msg-duplicate-email').show();
                 }
+                $('#msg-name-up').hide();
+                $('#msg-invalid-email-up').hide();
+                $('#msg-invalid-position-edit').hide();
             }
         });
     });
