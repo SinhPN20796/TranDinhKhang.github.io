@@ -13,7 +13,6 @@ function valid_input() {
 
     if (!pattern.test($('#id-email-employee-edit').val())){
         $('#msg-invalid-email-up').show();
-        $('#msg-duplicate-email').hide();
             isError = true;
     }
     
@@ -136,7 +135,7 @@ function load_data_update(node){
     $("#id-employee-phone-edit").val(node.data.phone);
     $("#id-employee-skype-edit").val(node.data.skype);
     $('#msg-name-up').hide();
-    $('#msg-duplicate-email').hide();
+    $('#msg-empty-email-up').hide();
     $('#msg-invalid-email-up').hide();
     $('#msg-invalid-position-edit').hide();
     $('#add-employee-modal.error-msg').hide();
@@ -147,8 +146,10 @@ function load_data_update(node){
     }
     if (node.data.unit_code == '') {
         $("#listuc").val('');
+        peopleApp.unit_code = node.data.unit_code;
     } else {
         $("#listuc").val(node.data.unit_code);
+        peopleApp.unit_code = node.data.unit_code;
     }
 }
 
@@ -165,7 +166,7 @@ function update_data_node(node) {
     // node.data.job_category_id = $("#id-role-category").val();
     node.data.phone = $("#id-employee-phone-edit").val();
     node.data.skype = $("#id-employee-skype-edit").val();
-    node.data.unit_code = peopleApp.unitcode;
+    node.data.unit_code = peopleApp.unit_code;
 }
 
 function update_info(node) {
@@ -185,7 +186,7 @@ function update_info(node) {
             // job_title_id: $("#id-role-type").val(),
             phone: $("#id-employee-phone-edit").val().trim(),
             skype: $("#id-employee-skype-edit").val(),
-            unit_code: peopleApp.unitcode,
+            unit_code: peopleApp.unit_code,
             active: $("input[name='emp_status']:checked").val(),
             reason: $("input[name='emp_status']:checked").val() == '1' ? '':$("#id-employee-reason").val()
         }),
@@ -217,9 +218,6 @@ function update_info(node) {
         },
         error: function (jqXHR, textStatus, errorThrown) {
             $("#id-edit-save").enable(true);
-            if ($('#id-email-employee-edit').val()){
-                $('#msg-duplicate-email').show();
-            }
         }
     });
 }
@@ -290,19 +288,20 @@ function remove_person(node, delete_kpis) {
             },
             success: function (data) {
                 if (typeof data == 'object' && data.status == "ok") {
+
+                    if (parent_node) {
+                        // load_data_node(parent_node);
+                        // st.onClick(parent_node.id);
+                        init_node(parent_node);
+                    }
+
+                    peopleApp.get_list_backup_user();
+
                     st.removeSubtree(node.id, true, 'animate', {
                         hideLabels: false,
                         onComplete: function () {
                         }
                     });
-
-                    if (parent_node) {
-                        // load_data_node(parent_node);
-                        st.onClick(parent_node.id); // Don't remove this if you don't know what you do
-                        init_node(parent_node);
-                    }
-
-                    peopleApp.get_list_backup_user();
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -334,7 +333,6 @@ function get_subordinate(node) {
 
 function bind_new_person() {
     $('#add-save-new-person').unbind('click');
-    $('#msg-duplicate-email').hide();
     $(".pass-control").show();
     $("#id_send_new_pass").prop('checked', false);
     $('#add-save-new-person').enable(true);
@@ -358,7 +356,7 @@ function bind_new_person() {
                 send_pass: $("#id_send_new_pass").is(":checked"),
                 phone: $("#id-employee-phone-edit").val(),
                 skype: $("#id-employee-skype-edit").val(),
-                unit_code: peopleApp.unitcode,
+                unit_code: peopleApp.unit_code,
             },
             url: "/performance/people/new/",
             beforeSend: function () {
@@ -392,12 +390,7 @@ function bind_new_person() {
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 $("#add-save-new-person").enable(true);
-                if ($('#id-email-employee-edit').val()){
-                    $('#msg-duplicate-email').show();
-                }
-                $('#msg-name-up').hide();
-                $('#msg-invalid-email-up').hide();
-                $('#msg-invalid-position-edit').hide();
+                alert(gettext("Data error"));
             }
         });
     });
@@ -425,7 +418,6 @@ function bind_avatar_upload(node) {
                 $('.progress-striped').hide();
                 $('.progress-striped .bar').css('width', '60%');
             } else {
-                console.log(response);
             }
             //alert(JSON.stringify(response));
         },
