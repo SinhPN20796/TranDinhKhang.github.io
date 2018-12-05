@@ -147,8 +147,10 @@ function load_data_update(node){
     }
     if (node.data.unit_code == '') {
         $("#listuc").val('');
+        peopleApp.unit_code = node.data.unit_code;
     } else {
         $("#listuc").val(node.data.unit_code);
+        peopleApp.unit_code = node.data.unit_code;
     }
 }
 
@@ -165,7 +167,7 @@ function update_data_node(node) {
     // node.data.job_category_id = $("#id-role-category").val();
     node.data.phone = $("#id-employee-phone-edit").val();
     node.data.skype = $("#id-employee-skype-edit").val();
-    node.data.unit_code = peopleApp.unitcode;
+    node.data.unit_code = peopleApp.unit_code;
 }
 
 function update_info(node) {
@@ -185,7 +187,7 @@ function update_info(node) {
             // job_title_id: $("#id-role-type").val(),
             phone: $("#id-employee-phone-edit").val().trim(),
             skype: $("#id-employee-skype-edit").val(),
-            unit_code: peopleApp.unitcode,
+            unit_code: peopleApp.unit_code,
             active: $("input[name='emp_status']:checked").val(),
             reason: $("input[name='emp_status']:checked").val() == '1' ? '':$("#id-employee-reason").val()
         }),
@@ -358,7 +360,7 @@ function bind_new_person() {
                 send_pass: $("#id_send_new_pass").is(":checked"),
                 phone: $("#id-employee-phone-edit").val(),
                 skype: $("#id-employee-skype-edit").val(),
-                unit_code: peopleApp.unitcode,
+                unit_code: peopleApp.unit_code,
             },
             url: "/performance/people/new/",
             beforeSend: function () {
@@ -425,7 +427,6 @@ function bind_avatar_upload(node) {
                 $('.progress-striped').hide();
                 $('.progress-striped .bar').css('width', '60%');
             } else {
-                console.log(response);
             }
             //alert(JSON.stringify(response));
         },

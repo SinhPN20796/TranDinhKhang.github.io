@@ -127,16 +127,17 @@ function total_old_weight_on_level(val, parent_id) {
     });
     return total_old_weight;
 }
-function setToolTipKPI(el, content){
-    $(el).qtip({
-        content: {
-            text: content.replace(/(?:\r\n|\r|\n)/g, '<br/>')
-        },
-        style: {
-            classes: 'qtip-green'
-        },
-    });
-}
+// function setToolTipKPI(el, content){
+//     $(el).qtip({
+//         content: {
+//             text: content.replace(/(?:\r\n|\r|\n)/g, '<br/>')
+//         },
+//         style: {
+//             classes: 'qtip-green'
+//         },
+//     });
+// }
+
 function collapse_kpi_group(kpi_id, refer_to_id, get_kpi_refer_group, is_search_page) {
 
     if ($('#kpi-wrapper-' + refer_to_id).length == 0 && is_search_page != 'True') {
@@ -461,7 +462,6 @@ Vue.mixin({
             //this.kpi_list[kpi_id]
 
         },
-
         compile: function(content, refs){
             //   // alert('inside compile');
             // var tmp = Vue.extend({
@@ -488,6 +488,7 @@ Vue.mixin({
             // temp_vm.$destroy()
 
         },
+
         track_component_created:function(track_obj, key){
             var that = this;
 
@@ -515,6 +516,7 @@ Vue.mixin({
             }
 
         },
+
         calert: function(){
             // alert('Çalışıyor');
         },
@@ -523,7 +525,7 @@ Vue.mixin({
         },
         get_inline_monthscores: function (monthstext, quarter, kpi) {
             // monthstext: ex: "T1|T2|T3|T4|T5|T6|T7|T8|T9|T10|T11|T12"
-
+            var monthstext = "T1|T2|T3|T4|T5|T6|T7|T8|T9|T10|T11|T12";
 
             var month_1_text=this.monthDisplay(monthstext, quarter, 1);
             var month_2_text=this.monthDisplay(monthstext, quarter, 2);
@@ -1382,17 +1384,19 @@ Vue.component('tag-search', {
 
 
 
-Vue.directive('settooltipkpi', {
-    params: ['content'],
-    paramWatchers: {
-        content: function (val, oldVal) {
-            setToolTipKPI($(this.el),this.params.content);
-        }
-    },
-    bind:function () {
-        setToolTipKPI($(this.el),this.params.content);
-    }
-});
+
+// Vue.directive('settooltipkpi', {
+//     params: ['content'],
+//     paramWatchers: {
+//         content: function (val, oldVal) {
+//             setToolTipKPI($(this.el),this.params.content);
+//         }
+//     },
+//     bind:function () {
+//         setToolTipKPI($(this.el),this.params.content);
+//     }
+// });
+
 
 Vue.component('kpi-editable', {
     delimiters: ["{$", "$}"],
@@ -1917,7 +1921,7 @@ Vue.component('kpi-progressbar', {
     ],
     data:function(){
         return {
-            temp_value: {},
+
         }
     },
     template: $('#kpi-progressbar-template').html(),
@@ -1937,46 +1941,6 @@ Vue.component('kpi-progressbar', {
         },
     },
     methods:{
-
-        save_action: function ( kpi, key, controller_prefix) {
-            this.$root.$emit('save_action', kpi, key, controller_prefix);
-            this.delete_temp(kpi, key);
-        },
-        cancel_action: function (kpi, key, controller_prefix) {
-            var that = this;
-            kpi_id = kpi['id'];
-            for (prop in that.temp_value[kpi_id][key]) {
-                kpi[prop] = that.temp_value[kpi_id][key][prop];
-            }
-            that.delete_temp(kpi, key);
-            kpi_ready(kpi['id'], controller_prefix, false);
-        },
-        delete_temp: function (kpi, key) {
-            var that = this;
-            kpi_id = kpi['id'];
-            delete that.temp_value[kpi_id][key];
-        },
-        tempsave_value: function (kpi, prop, key) {
-            var that = this;
-            kpi_id = kpi['id'];
-            if (!(that.temp_value.hasOwnProperty(kpi_id))) {
-                that.temp_value[kpi_id] = {};
-            }
-            if (!(that.temp_value[kpi_id].hasOwnProperty(key))) {
-                that.temp_value[kpi_id][key] = {};
-            }
-            if (that.temp_value[kpi_id][key][prop]) {
-                return;
-            }
-            else {
-                if (typeof kpi[prop] == 'undefined' || kpi[prop] == "")
-                    that.temp_value[kpi_id][key][prop] = null;
-                else {
-                    that.temp_value[kpi_id][key][prop] = kpi[prop];
-                }
-            }
-        },
-
         triggerAdjustPerformanceThreshold(kpi_id){
             this.$root.$emit('adjust_performance_level',kpi_id)
         },
@@ -2088,37 +2052,36 @@ Vue.component('kpi-progressbar', {
             }
         },
 
-        check_quarter_plan: function (kpi) {
+        check_quarter_plan: function (kpi, type) {
             var that = this;
-            var quarter_obj = {
-                1:"one",
-                2:"two",
-                3:"three",
-                4:"four"
-            };
-            var quarter_plan = kpi['quarter_' + quarter_obj[that.current_quarter.quarter] + '_target'];
-            if (kpi.score_calculation_type == 'sum'){
-                if ( kpi.target != quarter_plan) {
-                    return true;
-                }
-                return false;
+            var quarter = "one";
+            switch (that.current_quarter.quarter) {
+                case 1:
+                    quarter = "one";
+                    break;
+                case 2:
+                    quarter = "two";
+                    break;
+                case 3:
+                    quarter = "three";
+                    break;
+                case 4:
+                    quarter = "four";
+                    break;
+                default:
+                    break;
             }
-            else if (that.kpi.score_calculation_type == 'average'){
-                if ( kpi.target != quarter_plan ) {
-                    return true;
-                }
-                return false;
-            }
-            else if (kpi.score_calculation_type == 'most_recent') {
-                if ( kpi.target != quarter_plan) {
-                    return true;
-                }
-                return false;
-            }
-            else {
-                return false;
-            }
-
+            var quarter_plan = kpi['quarter_' + quarter + '_target'];
+            var month_1_target = kpi.month_1_target ? kpi.month_1_target : 0;
+            var month_2_target = kpi.month_2_target ? kpi.month_2_target : 0;
+            var month_3_target = kpi.month_3_target ? kpi.month_3_target : 0;
+            console.log('var actual_target = parseFloat((month_1_target + month_2_target + month_3_target).toFixed(5));'
+                + typeof month_1_target + '|'
+                + typeof month_2_target + '|'
+                + typeof month_3_target + '|'
+            )
+            var actual_target = parseFloat((month_1_target + month_2_target + month_3_target).toFixed(5));
+            return kpi.score_calculation_type == 'sum' && (kpi.target != quarter_plan || kpi.target != actual_target);
         },
         // moved to mixin
         // kpi_ready: function (kpi_id, controller_prefix, ready) {
@@ -2201,6 +2164,7 @@ Vue.component('group-kpi', {
     updated: function(){
         this.track_component_updated(COMMON.groups, this.group.slug);
     },
+
     mounted:function(){
 
 
@@ -3371,7 +3335,7 @@ var v = new Vue({
 
 
             var jqXhr=cloudjetRequest.ajax({
-                url: "/performance/kpi-editor/",
+                url: location.pathname,
                 type: 'post',
                 data: data,
                 success: function (new_kpi_data) {
@@ -3995,6 +3959,25 @@ var v = new Vue({
             return data;
 
         },
+        resetErrorWhenShow: function() {
+            $('#error-input-1').css('display','none');
+            $('#error-input-2').css('display','none');
+            $('#error-input-3').css('display','none');
+            $('#error-input-4').css('display','none');
+        },
+        check_number: function(e){
+            var charCode = e.which || e.keyCode; //It will work in chrome and firefox.
+            var _number = String.fromCharCode(charCode);
+            if (e.key !== undefined && e.charCode === 0) {
+                // FireFox key Del - Supr - Up - Down - Left - Right
+                return;
+            }
+            if ('0123456789.'.indexOf(_number) !== -1) {
+                return _number;
+            }
+            e.preventDefault();
+            return false;
+        },
         update_adjusting_chart: function () {
             var self = this;
             console.log('triggered')
@@ -4194,7 +4177,76 @@ var v = new Vue({
             self.init_adjust(kpi_id);
             console.log(self.adjusting_kpi)
             $('#performance-level-adjust').modal();
-            resetErrorWhenShow();
+            self.resetErrorWhenShow();
+        },
+        checkInput1: function (input_1,target) {
+            var id = $('.row.col-sm-12.evaluate-chart').attr('id');
+            if(input_1 >= target || input_1 < 0 ) {
+                if( id == '<=')
+                    $('#error-input-1').css('display','');
+                else
+                    $('#error-input-3').css('display','');
+            }
+            else {
+                if( id == '<=')
+                    $('#error-input-1').css('display','none');
+                else
+                    $('#error-input-3').css('display','none');
+            }
+        },
+        check_paste: function (evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+        },
+        checkInput3: function(input_3,target) {
+            var id = $('.row.col-sm-12.evaluate-chart').attr('id');
+            if(input_3 <= target ) {
+                if( id == '<=')
+                    $('#error-input-2').css('display','');
+                else
+                    $('#error-input-4').css('display','');
+            }
+            else {
+                if( id == '<=')
+                    $('#error-input-2').css('display','none');
+                else
+                    $('#error-input-4').css('display','none');
+            }
+        },
+        triggerClickTab: function(current_tab,e){
+            var self = this
+            self.$set('adjusting_kpi.adjusting_month',current_tab);
+            self.update_adjusting_chart();
+            self.checkConditon(e);
+        },
+        checkConditionInput1: function() {
+            var self = this
+            var current_tab = $('.row.col-sm-12.evaluate-chart').find('.tab-pane.fade.in.active');
+            var target = parseFloat(current_tab.find('#input-2').val());
+            var input_1 =  parseFloat(current_tab.find('#input-1').val());
+            self.checkInput1(input_1,target);
+            self.update_adjusting_chart()
+        },
+        checkConditionInput3: function() {
+            var self = this
+            var current_tab = $('.row.col-sm-12.evaluate-chart').find('.tab-pane.fade.in.active');
+            var target = parseFloat(current_tab.find('#input-2').val());
+            var input_3 = parseFloat(current_tab.find('#input-3').val());
+            self.checkInput3(input_3,target);
+            self.update_adjusting_chart()
+        },
+        checkConditon: function (e) {
+            var self = this
+            $('#error-input-1').css('display','none');
+            $('#error-input-2').css('display','none');
+            $('#error-input-3').css('display','none');
+            $('#error-input-4').css('display','none');
+            var id = $(e).find('a').attr('href');
+            var input_1 = parseFloat($(id).find('#input-1').val());
+            var target = parseFloat($(id).find('#input-2').val());
+            var input_3 = parseFloat($(id).find('#input-3').val());
+            self.checkInput1(input_1,target);
+            self.checkInput3(input_3,target);
         },
         formatTime: function (time) {
             if (COMMON.LanguageCode == 'en'){
@@ -5386,14 +5438,12 @@ var v = new Vue({
         },
         update_quarter_target: function (kpi, callback = null) {
             var that = this;
-            kpi.command = 'update_quarter_target';
             cloudjetRequest.ajax({
                 type: "POST",
-                url: COMMON.LinkKPISevices,
+                url: `/api/v2/kpi/${kpi.id}/update-quarter-target/`,
                 data: JSON.stringify(kpi),
                 success: function (data) {
                     that.kpi_list[kpi.id] = Object.assign(that.kpi_list[kpi.id], data);
-                    that.get_current_employee_performance();
 
                     for (i = 1; i <= 4; i++) {
                         $('#qtip' + kpi.id + '_' + i).qtip({
@@ -5414,7 +5464,24 @@ var v = new Vue({
                 callback();
             }
         },
+        update_score_calculation_type: function (kpi, callback = null) {
+            var that = this;
+            cloudjetRequest.ajax({
+                type: "POST",
+                url: `/api/v2/kpi/${kpi.id}/update-score-calculation-type/`,
+                data: JSON.stringify(kpi),
+                success: function (data) {
+                    that.kpi_list[kpi.id] = Object.assign(that.kpi_list[kpi.id], data);
+                    that.get_current_employee_performance();
 
+                    success_requestcenter(gettext("Update successful!"));
+                },
+                contentType: "application/json"
+            });
+            if (typeof callback === 'function') {
+                callback();
+            }
+        },
         set_month_target_from_last_quarter_three_months_result: function (kpi_id, user_id, kpi_unique_key, last_quarter_id) {
             // Khang build this function
             //       Pace.start(); // Monitor ajax
@@ -5593,6 +5660,7 @@ var v = new Vue({
                             //$('.kpiprogressreview-wrapper').tooltip();
                             that.$set(that.kpi_list[kpi.id], 'latest_score', data.score)
                             that.$set(that.kpi_list[kpi.id], 'real', data.real)
+                            that.kpi_list[kpi.id].target = data.kpi.target;
 
                             that.kpi_list[kpi.id].latest_score = data.score; //JSON.parse(data);
                             that.kpi_list[kpi.id].real = data.real; //JSON.parse(data);
@@ -5780,11 +5848,11 @@ var v = new Vue({
         },
         view_backup_kpis: function (id) {
             var self = this;
-            $('#view-backup-kpi-modal').modal('show');
+            $('#view-backup-kpi-modal').modal();
             $('#backup-kpi-modal').modal('hide');
             // find backup by id
             self.current_backup = self.backups_list[id];
-            // console.log('fihihhihihc');
+            console.log('fihihhihihc');
 
             if (self.current_backup && self.current_backup.hasOwnProperty('data')) {
                 var kpis = self.current_backup.data;
@@ -5810,7 +5878,7 @@ var v = new Vue({
         get_backup_month_target: function (index) {
             var self = this;
             var month = self.current_backup.month;
-            return ((self.backup_kpis[index]['month_' + month + '_target'] > 0)?(self.backup_kpis[index]['month_' + month + '_target']).toFixed(2):0);
+            return (self.backup_kpis[index]['month_' + month + '_target']).toFixed(2);
         },
         get_backup_month_real: function (index) {
             var self = this;
@@ -6102,14 +6170,13 @@ var v = new Vue({
             $("#complate-review-modal").on("hidden.bs.modal", function () {
                 html2canvas(document.body, {
                     onrendered: function (canvas) {
-                        $('#btn-complete-review').html(temp);
-
                         var a = document.createElement('a');
                         // toDataURL defaults to png, so we need to request a jpeg, then convert for file download.
                         a.href = canvas.toDataURL("image/jpeg").replace("image/jpeg", "image/octet-stream");
                         // a.download = (new Date()) + '-kpi.jpg';
                         a.download = 'KPIs ' + (new Date()) + '.jpg';
                         a.click();
+                        $('#btn-complete-review').html('');
                     }
 
                 });
