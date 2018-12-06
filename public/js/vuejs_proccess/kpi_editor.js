@@ -5689,6 +5689,7 @@ var v = new Vue({
         complete_review_modal: function () {
             $('#complate-review-modal').modal();
             this.count_zero_score_kpi();
+            this.get_current_employee_performance();
         },
 
         edit_weight_modal: function (){
