@@ -983,6 +983,10 @@ var targetPage = new Vue({
                 var filesaver = saveAs(new Blob([buffer], {
                     type: "application/octet-stream"
                 }), filename);
+
+                setTimeout(function () {
+                    window.close();
+                }, 4000);
             });
         },
 
