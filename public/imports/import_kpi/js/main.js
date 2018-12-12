@@ -1,20 +1,15 @@
-
-function extractEmails(text) {
-    return text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi);
-}
 Vue.component('edit-import-kpi-modal', {
     delimiters: ['${', '}$'],
-    props: ['kpi', 'showmodal'],
+    props: ['kpi'],
     template: $('#edit-import-kpi-modal').html(),
     data: function () {
         return {
             data_edit_kpi: {},
-            showmodal: false,
-            method: ["sum", "average", "most_recent", "tổng", "trung bình", "tháng/quý gần nhất"],
+            list_kpi_id: ['f', 'c', 'p', 'l', 'o'],
+            method: ["sum", "average", "most_recent", "tính tổng", "trung bình", "tháng gần nhất"],
         }
     },
     mounted: function () {
-        // {#            console.log(this.showmodal)#}
         // {#            this.old_data = this.kpi#}
     },
     created: function () {
@@ -29,9 +24,6 @@ Vue.component('edit-import-kpi-modal', {
                     this.data_edit_kpi = JSON.parse(JSON.stringify(newVal))
             },
             deep: true
-        },
-        showmodal: function (val) {
-            this.showmodal = val
         },
     },
     beforeDestroy: function () {
@@ -53,31 +45,14 @@ Vue.component('edit-import-kpi-modal', {
             var self = this
                 self.$emit('comfirm',self.data_edit_kpi)
         },
-        extractEmails: function (email) {
+        isEmailFormatValid: function (email) {
              if (email) {
-                 return /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi.test(email);
+                 return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/gi.test(email);
              }
             return false;
         },
-        check_number: function(e){
-            var _number = String.fromCharCode(e.keyCode);
-            if ('0123456789.'.indexOf(_number) !== -1) {
-                return _number;
-            }
-            e.preventDefault();
-            return false;
-        },
-        check_paste: function (evt) {
-                evt.preventDefault();
-                evt.stopPropagation();
-        },
-        valid_change: function (obj, prop) {
-            var val = parseFloat(obj[prop]);
-            if (isNaN(val)) {
-                Vue.set(obj, prop, null);
-            } else {
-                Vue.set(obj, prop, val);
-            }
+        checkTypeKPI: function(type_kpi){
+            return /^([fclopFCLOP]{1}[0-9]+)((\.[0-9]+)*)$/gi.test(type_kpi)
         },
     }
 })
@@ -99,6 +74,12 @@ el: '#home-template',
 },
 data: function () {
     return {
+        info_msg_box:{
+            show_infor_msg: false,
+            type_msg:'',//success or error
+            tite_msg:'',// thêm kpi thất bại
+            array_msg:[]// [mã kpi quá 100 ký tư, mục tiêu kpi quá 300 ký tự]
+        },
         enable_allocation_target:  false,
         alert_import_kpi: true,
         id_row_error: [],
@@ -108,17 +89,16 @@ data: function () {
         error_add: '',
         check_error_upload: false,
         check_file: true,
-        dialogFormVisible: false,
         data_edit_kpi: {
             data: {},
             index: -1,
             check_error: false,
-            msg: ""
+            msg: [],
         },
         organization:{},
         file: {},
         check_total: 0,
-        method: ["sum", "average", "most_recent", "tổng", "trung bình", "tháng/quý gần nhất"],
+        method: ["sum", "average", "most_recent", "tính tổng", "trung bình", "tháng gần nhất"],
         method_save: '',
 
     }
@@ -139,10 +119,6 @@ filters: {
 
 },
 methods: {
-        triggeredDismissModal: function(){
-            // console.log('triggered show modal')
-            this.dialogFormVisible = false
-        },
     hideUnusedTableHead: function(){
         console.log("triggered this hiding function")
         setTimeout(function(){
@@ -151,7 +127,7 @@ methods: {
         },100)
     },
     getOrg: function () {
-            self = this;
+            var self = this;
             cloudjetRequest.ajax({
                 method: "GET",
                 url: "/api/organization",
@@ -206,7 +182,7 @@ methods: {
         return str;
     },
     trans_method: function(str){
-         if(str=='sum'){
+        if(str=='sum'){
             return gettext('sum');
         }
         if(str=='average'){
@@ -216,6 +192,17 @@ methods: {
             return gettext('most_recent');
         }
         return str;
+    },
+    trigger_close_msg_box: function(){
+        // reset infor msg box
+        var self = this
+        var msg_box = {
+            show_infor_msg: false,
+            type_msg:'',
+            tite_msg:'',
+            array_msg:[]
+        }
+        self.info_msg_box = Object.assign(self.info_msg_box, msg_box)
     },
     handleDropFile: function (e) {
         e.stopPropagation();
@@ -228,8 +215,11 @@ methods: {
         }
         this.handleFile(e);
     },
+    checkTypeKPI: function(type_kpi){
+        return /^([fclopFCLOP]{1}[0-9]+)((\.[0-9]+)*)$/gi.test(type_kpi)
+    },
     handleFile: function (e) {
-         var that = this;
+        var that = this;
         that.kpis.length = 0;
         that.check_file = true;
         var files = e.target.files || e.dataTransfer.files;
@@ -461,25 +451,17 @@ methods: {
 
 
                                     try {
-                                        var email = extractEmails(sheet["AA" + i].w)[0];
+                                        var email = isEmailFormatValid(sheet["AA" + i].w)[0];
                                     } catch (err) {
                                         var email = '';
                                     }
-
-
-
-
-                                    // <check-duplicated>
-
-                                    // {#                                                    var duplicated_codes = that.kpis.filter(function (item) {#}
-                                    //     {#                                                        return item.code.toLowerCase().trim() == code.toLowerCase().trim()#}
-                                    //     {#                                                    });#}
-                                    // {#                                                    if (code != "" && duplicated_codes.length > 0) {#}
-                                    //     {#                                                        throw "Duplicated Code";#}
-                                    //     {#                                                    }#}
-
-                                    // </check-duplicated>
+                                    try {
+                                        var code = sheet["AD" + i].w;
+                                    } catch (err) {
+                                        var code = '';
+                                    }
                                     that.kpis.push({
+                                        "code": code,
                                         "kpi_id": kpi_id,
                                         "check_goal": check_goal,
                                         "goal": goal,
@@ -513,17 +495,16 @@ methods: {
                                         "check_error_quarter_3": false,
                                         "check_error_quarter_4": false,
                                         "index": "",
-                                        "msg":"",
-                                        "_uuid": makeid()
-
-
+                                        "msg":[],
+                                        "_uuid": makeid(),
+                                        "code_kpi_existed":false,
+                                        "email_is_incorrect":false
                                     });
                                     console.log(that.kpis);
                                 } catch (err) {
                                     that.is_error = true;
                                     that.kpis.push({
                                         "code": "[Error on line: " + i + "] > " + err
-
                                     });
 
                                 }
@@ -543,8 +524,8 @@ methods: {
                             async.waterfall(
                                 that.kpis.forEach(function (kpi, index) {
                                     kpi.index = index
-                                    that.validate_kpi(index);
-                                    console.log(that.kpis[index]);
+                                    kpi = that.validate_kpi(kpi);
+                                    // that.$set(that.kpis, index, kpi);
                                     return kpi
                                 })
                             )
@@ -585,15 +566,15 @@ methods: {
         self.$set(self,'id_row_error',self.id_row_error)
     },
 
-    extractEmails: function (email) {
+    isEmailFormatValid: function (email) {
         if (email) {
-            return /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi.test(email);
+            return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/gi.test(email);
         }
         return false;
     },
     init: function () {
 
-         var that = this;
+        var that = this;
         that.getOrg()
 
         //  document.getElementById('drop').addEventListener('drop', that.handleDrop, false);
@@ -620,21 +601,15 @@ methods: {
         // Process conditions
 
         // year target bang voi tong target cac quy
-        var year_target_input = !$.isNumeric(kpi.year) ? null : parseFloat(kpi.year).toFixed(4)
-        year_target_input = parseFloat(year_target_input) || null
-        sum_q = !$.isNumeric(sum_q) ? null : parseFloat(sum_q).toFixed(4)
-        sum_q = parseFloat(sum_q) || null
+        kpi.year = !$.isNumeric(kpi.year)?null:parseFloat(kpi.year)
         var yearTargetValid =  kpi.year == sum_q
         if(!yearTargetValid){
             kpi.check_error_year = true
         }
         //bao loi khi thang khong theo phuong phap phan quy
         for(var i = 1;i<5; i++){
-            var quarter_target_input = !$.isNumeric(kpi['q' + i]) ? null : parseFloat(kpi['q' + i]).toFixed(4)
-            quarter_target_input = parseFloat(quarter_target_input) || null
-            totalQuarterArray[i - 1] = !$.isNumeric(totalQuarterArray[i - 1]) ? null : parseFloat(totalQuarterArray[i - 1]).toFixed(4)
-            totalQuarterArray[i - 1] = parseFloat(totalQuarterArray[i - 1]) || null
-            if (!(quarter_target_input == totalQuarterArray[i - 1])) {
+            kpi['q' + i] = !$.isNumeric(kpi['q' + i])?null:parseFloat(kpi['q' + i])
+            if(!(kpi['q' + i] == totalQuarterArray[i -1])){
                 kpi['check_error_quarter_' + i] = true
             }
         }
@@ -646,18 +621,6 @@ methods: {
         }
         return kpi
     },
-    // validateIsSumQuarter: function (kpi,sum_p,totalQuarterArray,sum_year) {//sum_q1,sum_q2,sum_q3,sum_q4 or average_q1,average_q2,average_q3,average_q4
-    //     var self = this;
-    //     return kpi = self.checkValidate(kpi,sum_p,totalQuarterArray,sum_year)
-    // },
-    // validateIsMostRecent: function (kpi,most_recent_q,totalQuarterArray,sum_year) {
-    //     var self = this;
-    //     return kpi = self.checkValidate(kpi,most_recent_q,totalQuarterArray,sum_year)
-    // },
-    // validateIsAverage: function (kpi,average_q,totalQuarterArray,sum_year) {
-    //     var self = this;
-    //     return kpi = self.checkValidate(kpi,average_q,totalQuarterArray,sum_year)
-    // },
     calculationScore: function(score){
         var self = this
         var year = score.year
@@ -737,182 +700,162 @@ methods: {
         }
         return kpi
     },
-    validate_kpi: function (index) {
+    validate_kpi: function (kpi) {
         var self = this
         var operator = ['<=', '>=', '='];
         var scores = ['q1', 'q2', 'q3', 'q4'];
-        var months = ['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10', 't11', 't12']
-        if (index == undefined) {
-            return;
+        var list_kpi_id = ['f', 'c', 'p', 'l', 'o']
+        var list_field_name_kpi = ['code','kpi_id','unit','measurement','weight','goal','kpi','score_calculation_type','operator']
+        var object_trans_field = {
+            'code':"Mã KPI",
+            'kpi_id':"Loại KPI",
+            'unit': "Đơn vị",
+            'measurement': "Phương pháp đo lường",
+            'weight': "Trọng số",
+            'goal':"Mục tiêu kpi",
+            'kpi': "Tên KPI",
+            'score_calculation_type': "Phương pháp phân bổ chỉ tiêu",
+            'operator':"Toán tử"
         }
-        var kpi = self.kpis[index];
-        kpi.weight =  self.to_string(kpi.weight)
-        if(!kpi.score_calculation_type){
-            kpi.score_calculation_type = ""
+        if (kpi.index == undefined) {
+            return kpi;
         }
-        if(!kpi.kpi_id){
-            kpi.kpi_id = ""
+        if (self.enable_allocation_target){
+            kpi = self.validateTargetScoreFollowAllocationTarget(kpi)
         }
-        if(!kpi.unit){
-            kpi.unit = ""
-        }
-        if(!kpi.measurement){
-            kpi.measurement = ""
-        }
-         if(!kpi.goal){
-            kpi.goal = ""
-        }
-        if(!kpi.kpi){
-            kpi.kpi = ""
-        }
-        if(!kpi.operator){
-            kpi.operator = ""
-        }
-        kpi.msg = '';
+        list_field_name_kpi.forEach(function (field) {
+            kpi[field] = !kpi[field]?'':kpi[field].toString()
+        })
+        kpi.msg = [];
         self.check_file = true;
-        var quarter_error = [];// mảng lưu quý bị lỗi
-        var months_error = [];// mảng lưu tháng bị lỗi
-
         cloudjetRequest.ajax({
             type: "POST",
             url: '/api/kpis/import/validate',
             data: JSON.stringify(kpi),
             success: function (responseJSON, textStatus) {
-                // console.log('yes, we can!');
-                // router.push('/');
                 kpi.status = null;
                 if (responseJSON['status'] == 'ok') {
                     kpi.validated = true;
-                    if (self.method.indexOf(kpi.score_calculation_type.trim().toLowerCase()) == -1){
-                        kpi.validated = false;
-                        kpi.status = responseJSON['status'];
-                        self.check_file = false;
-                        kpi.msg = kpi.msg + "\n" + gettext("Score calculation type format is not correct");
-                    }
-
-                    if (operator.indexOf(kpi.operator) == -1 && kpi.operator) {
-                        kpi.validated = false;
-                        kpi.status = responseJSON['status'];
-                        self.check_file = false;
-                        kpi.msg = kpi.msg + "\n" + gettext('Operator format is not correct');
-                    }
-                    if (kpi.msg.trim()[0] == '\n') {
-                        kpi.msg = kpi.msg.slice(2, kpi.msg.length);
-                        kpi.msg = kpi.msg.charAt(0).toUpperCase() + kpi.msg.slice(1);
-                    }
+                    kpi.status = responseJSON['status'];
+                    kpi.email_is_incorrect = false;
+                    kpi.code_kpi_existed = false;
                 } else {
                     kpi.status = responseJSON['status'];
                     kpi.validated = false;
-                    kpi.msg = responseJSON['message'];
-                    self.check_file = false;
-
-                    if (kpi.unit.trim()==''){
-                        kpi.validated = false;
-                        kpi.msg = kpi.msg + "\n" + gettext("Unit is not formatted correctly");
-                    }
-                    if (kpi.kpi_id.trim()==''){
-                        kpi.validated = false;
-                        kpi.msg = kpi.msg + "\n" +gettext("Type must not be empty");
-                    }
-
-                    if (kpi.measurement.trim()==''){
-                        kpi.validated = false;
-                        kpi.msg = kpi.msg + "\n" + gettext("Measurement must not empty");
-                    }
-
-                    if (operator.indexOf(kpi.operator) == -1 && kpi.operator) {
-                        kpi.msg = kpi.msg + "\n" + gettext("Operator format is not correct");
-                    }
-                    if (self.method.indexOf(kpi.score_calculation_type.trim().toLowerCase()) == -1){
-                        kpi.validated = false;
-                        kpi.status = responseJSON['status'];
+                    if (responseJSON['messages'].length>0){
                         self.check_file = false;
-                        kpi.msg = kpi.msg + "\n" + gettext("Score calculation type format is not correct");
+                        responseJSON['messages'].forEach(function (message) {
+                            if(message.field_name == gettext("In charge Email")){
+                                kpi.email_is_incorrect = true
+                            }
+                            if(message.field_name == gettext("KPI Code")){
+                                kpi.code_kpi_existed = true
+                            }
+                            kpi.msg.push(
+                                {
+                                    'field_name': message.field_name,
+                                    'message': message.message
+                                })
+                        })
                     }
                 }
-                kpi.year = kpi.year == null? kpi.year : kpi.year.toString().replace(/,/g, '')
-                if (isNaN(kpi.year) ) {
+                list_field_name_kpi.forEach(function (field) {
                     kpi.validated = false;
-                    kpi.msg = kpi.msg + "\n" + "Điểm năm" + " không đúng định dạng";
-                }
-                scores.forEach(function (score) {
-                    kpi[score] = kpi[score]== null?kpi[score]:kpi[score].toString().replace(/,/g, '')
-                    if (isNaN(kpi[score])) {
-                        quarter_error.push(scores.indexOf(score)+1)
+                    if (kpi[field].trim() == ""){
+                        kpi.msg.push({
+                            'field_name': object_trans_field[field],
+                            'message': ' không được để trống'
+                        });
                     }
                 })
-                months.forEach(function (month) {
-                    kpi[month] = kpi[month]== null?kpi[month]:kpi[month].toString().replace(/,/g, '')
-                    if (isNaN(kpi[month])) {
-                        months_error.push(months.indexOf(month)+1)
+                // check loại kpi phải thuộc ['f', 'c', 'p', 'l', 'o']
+                if (kpi.kpi_id.trim()){
+                    var __kpi_id = kpi.kpi_id.trim()
+                    var is_kpi_id = self.checkTypeKPI(__kpi_id)
+                    if(!is_kpi_id){
+                        kpi.msg.push({
+                            'field_name': 'Loại KPI',
+                            'message': ' không đúng'
+                        });
                     }
-                })
-                if (quarter_error.length > 0 ) {
+                }
+                if (operator.indexOf(kpi.operator) == -1 && kpi.operator.trim()) {
                     kpi.validated = false;
-                    var quarter_error_str = quarter_error.join(', ') + " " + "không đúng định dạng";
-                    kpi.msg = kpi.msg + "\n" + "Điểm quý" + " " + quarter_error_str;
+                    kpi.msg.push({
+                        'field_name': 'Toán tử',
+                        'message': ' không đúng định dạng'
+                    });
                 }
-                if (months_error.length > 0 ) {
+                if (self.method.indexOf(kpi.score_calculation_type.trim().toLowerCase()) == -1 && kpi.score_calculation_type.trim()){
                     kpi.validated = false;
-                    var months_error_str = months_error.join(', ') + " " + "không đúng định dạng";
-                    kpi.msg = kpi.msg + "\n" + "Điểm tháng" + " " + months_error;
+                    kpi.status = responseJSON['status'];
+                    self.check_file = false;
+                    kpi.msg.push({
+                        'field_name': 'Phương pháp phân bổ chỉ tiêu',
+                        'message': ' không đúng định dạng'
+                    });
                 }
-
-                if (self.enable_allocation_target){
-                    kpi = self.validateTargetScoreFollowAllocationTarget(kpi)
-                }
-                kpi.weight = kpi.weight == null?kpi.weight :kpi.weight.replace(/,/g, '');
+                kpi.weight = kpi.weight.replace(',', '.');
                 if (isNaN(parseFloat(kpi.weight)) && kpi.weight) {
                     kpi.validated = false;
-                    kpi.msg = kpi.msg + "\n" +gettext("Weights are not formatted correctly");
+                    kpi.msg.push({
+                        'field_name': 'Trọng số',
+                        'message': ' không đúng định dạng'
+                    });
                 }
                 if (parseFloat(kpi.weight) <= 0) {
                     kpi.validated = false;
-                    kpi.msg = kpi.msg + "\n" +gettext("Weight must be greater than 0");
+                    kpi.msg.push({
+                        'field_name': 'Trọng số',
+                        'message': ' phải lớn hơn 0'
+                    });
                 }
                 if (kpi.check_error_year == true){
                     kpi.validated = false;
-                    kpi.msg = kpi.msg + "\n" +gettext("Year must be follow score calculation type");
+                    kpi.msg.push({
+                        'field_name': 'Chỉ tiêu năm',
+                        'message': ' phải theo phương pháp phân rã chỉ tiêu'
+                    });
                 }
                 if (kpi.check_error_quarter_1 == true){
                     kpi.validated = false;
-                    kpi.msg = kpi.msg + "\n" + gettext("Quarter 1 must be follow score calculation type");
+                    kpi.msg.push({
+                        'field_name': 'Chỉ tiêu quý 1',
+                        'message': ' phải theo phương pháp phân rã chỉ tiêu'
+                    });
                 }
                 if (kpi.check_error_quarter_2 == true){
                     kpi.validated = false;
-                    kpi.msg = kpi.msg + "\n" + gettext("Quarter 2 must be follow score calculation type");
+                     kpi.msg.push({
+                        'field_name': 'Chỉ tiêu quý 2',
+                        'message': ' phải theo phương pháp phân rã chỉ tiêu'
+                    });
                 }
                 if (kpi.check_error_quarter_3 == true){
                     kpi.validated = false;
-                    kpi.msg = kpi.msg + "\n" +gettext("Quarter 3 must be follow score calculation type");
+                     kpi.msg.push({
+                        'field_name': 'Chỉ tiêu quý 3',
+                        'message': ' phải theo phương pháp phân rã chỉ tiêu'
+                    });
                 }
                 if (kpi.check_error_quarter_4 == true){
                     kpi.validated = false;
-                    kpi.msg = kpi.msg + "\n" + gettext("Quarter 4 must be follow score calculation type");
+                    kpi.msg.push({
+                        'field_name': 'Chỉ tiêu quý 4',
+                        'message': ' phải theo phương pháp phân rã chỉ tiêu'
+                    });
                 }
-                if (kpi.kpi === '') {
-                    kpi.validated = false;
-                    kpi.msg = kpi.msg + "\n" + gettext("Name must not be empty");
-                }
-                if (kpi.goal == "") {
-                    kpi.validated = false;
-                    kpi.msg = kpi.msg + "\n" + gettext("KPI targets must not be empty");
-                }
-                if (kpi.msg.trim() == '\n') {
-                    kpi.msg = kpi.msg.slice(2, kpi.msg.length);
-                    kpi.msg = kpi.msg.charAt(0).toUpperCase() + kpi.msg.slice(1);
-                }
-
-
-                console.log("===============xxxxxxxxx============")
-                console.log(kpi.msg)
-                if(kpi.msg !== ''){
+                // if (kpi.msg.trim() == '\n') {
+                //     kpi.msg = kpi.msg.slice(2, kpi.msg.length);
+                //     kpi.msg = kpi.msg.charAt(0).toUpperCase() + kpi.msg.slice(1);
+                // }
+                if(kpi.msg.length > 0){
                     self.addRowError(kpi._uuid)
                 }else{
                     self.removeRowError(kpi._uuid)
                 }
-                self.$set(self.kpis, index, kpi);
-                self.$set(self.data_edit_kpi, 'msg', kpi.msg);
+                // self.$set(self.kpis, index, kpi);
+                // self.$set(self.data_edit_kpi, 'msg', kpi.msg);
                 try{
                     // auto scroll to error messages
                     setTimeout(function(){
@@ -921,22 +864,25 @@ methods: {
                 }catch(err){
 
                 }
+                self.$set(self.data_edit_kpi, 'data', kpi)
+                return kpi
 
             },
             error: function (jqXHR, textStatus) {
-                kpi.status = message_request;
-                kpi.msg = null;
+                kpi.status = jqXHR.message_request;
+                kpi.msg = [];
                 try {
-                    kpi.msg = "Validate failed: " + jqXHR.responseJSON['message'];
+                    kpi.msg.push( {'field_name':"Validate failed: ",'message': jqXHR.responseJSON['message']})
                     self.check_file = false;
                 } catch (err) {
                 }
-                if(kpi.msg !== ''){
+                if(kpi.msg.length >0){
                     self.addRowError(kpi._uuid)
                 }else{
                     self.removeRowError(kpi._uuid)
                 }
-                self.$set(self.kpis, index, kpi);
+                return kpi
+                // that.$set(that.kpis, index, kpi);
             },
             complete: function (data) {
                 self.check_total++;
@@ -951,7 +897,7 @@ methods: {
             contentType: "application/json"
 
         });
-        self.$set(self.kpis, index, kpi);
+        // self.$set(self.kpis, index, kpi);
     },
     to_string: function (value) {
         return value != null ? value.toString() : null;
@@ -988,10 +934,6 @@ methods: {
             that.data_edit_kpi.data.weight = parseFloat(that.data_edit_kpi.data.weight);
         }
         that.data_edit_kpi.index = index;
-        console.log("======>>>>>>>>>>>><<<<<<<<<thssg")
-        console.log(that.data_edit_kpi)
-        that.dialogFormVisible = true
-        console.log(that.dialogFormVisible)
         setTimeout(function () {
             $('#edit-import-kpi').modal('show');
             $('.modal-dialog .modal-body').attr('style', 'max-height:' + parseInt(screen.height * 0.6) + 'px !important; overflow-y: auto');
@@ -1006,30 +948,35 @@ methods: {
     },
     confirm_edit_kpi: function (kpi) {
         var self = this;
+        var kpi_validate = {}
         self.resetErrorMsg(kpi.data)
-        // {#                              that.data_edit_kpi.check_error = true;#}
-        // kpi.data.weight = kpi.data.weight; ?? không cần thiết
-        self.kpis[kpi.index] = kpi.data;
         kpi.data.msg = '';
-        self.validate_kpi(kpi.index)
-        self.data_edit_kpi.data = self.kpis[kpi.index]
+        self.validate_kpi(kpi.data)
         setTimeout(function () {
             if (!$('.text-muted').length) {
                 $("body.bg-sm").removeAttr("style");
-                setTimeout(function () {
-                    $('#edit-import-kpi').modal('hide');
-                    swal({
-                        title: gettext("Success"),
-                        text: gettext("Edit import KPI success!"),
-                        type: "success",
-                        timer: 2000,
-                        confirmButtonColor: "#43ABDB"
-                    });
-                }, 200)
+                self.info_msg_box.show_infor_msg = true;
+                if(self.data_edit_kpi.data.msg.length > 0){
+                    self.info_msg_box.type_msg = "error";
+                    self.info_msg_box.tite_msg = "Chỉnh sửa KPI không thành công"
+                    self.data_edit_kpi.data.msg.forEach(function (field) {
+                        self.info_msg_box.array_msg.push(field.field_name + ":" + field.message )
+                    })
+
+                }else{
+                    $('#edit-import-kpi').modal('hide')
+                    self.info_msg_box.type_msg = "success";
+                    self.info_msg_box.tite_msg = "Chỉnh sửa KPI thành công"
+                    self.info_msg_box.array_msg.push("Chỉnh sửa nhập dữ liệu KPI thành công !")
+                    self.$set(self.kpis, self.data_edit_kpi.data.index, self.data_edit_kpi.data);
+                    setTimeout(function () {
+                        self.info_msg_box.show_infor_msg = false;
+                    },2000)
+                }
+
                 return;
             }
         }, 1000)
-
         // Không cần thiết vì đã có filter xử lý việc này => tránh lỗi chuyển data kpi.score_calculation_type
         // qua tiếng việt rồi lại qua tiếng anh chỉ để show lên xem
         //
@@ -1059,6 +1006,7 @@ methods: {
             operator: kpi.operator,
             weight: parseFloat(kpi.weight) || null,
             email: kpi.email,
+            code: kpi.code,
             year_data: {
                 months_target: {
                     quarter_1: {
@@ -1088,31 +1036,33 @@ methods: {
         return data_import_kpi
     },
     add_kpi: function (index) {
-        var that = this;
+        var self = this;
         $('#error_modal').modal('hide');
         if (index == undefined) {
             return;
         }
-        var kpi = that.kpis[index];
+        var kpi = self.kpis[index];
 
         kpi.status = "adding";
         if ((kpi.score_calculation_type.trim().toLowerCase() == ''
             || kpi.score_calculation_type.trim().toLowerCase() == 'most recent')
-            && that.check_kpi_child(kpi.kpi_id))
+            && self.check_kpi_child(kpi.kpi_id))
             kpi.score_calculation_type = 'most_recent';
-        that.$set(that.kpis, index, kpi);
+        self.$set(self.kpis, index, kpi);
 
-        var p = that.method.indexOf(kpi.score_calculation_type.trim().toLowerCase());
+        var p = self.method.indexOf(kpi.score_calculation_type.trim().toLowerCase());
         if (p > 2 && p <6){
-            that.method_save = that.method[p-3];
+            self.method_save = self.method[p-3];
         }
         else if( 0 <= p && p <= 2){
-            that.method_save = that.method[p];
+            self.method_save = self.method[p];
         }else {
-            that.method_save = "";
+            self.method_save = "";
         }
-        kpi.score_calculation_type = that.method_save;
-        var kpi_data_import = that.convertNewStructData(kpi)
+        kpi.score_calculation_type = self.method_save;
+
+        var kpi_data_import = self.convertNewStructData(kpi)
+        $('.add_kpi_' + index).button('loading')
         cloudjetRequest.ajax({
             type: "POST",
             url: "/api/kpis/import/add",
@@ -1121,32 +1071,41 @@ methods: {
                 //console.log('yes, we can!');
                 // router.push('/');
                 kpi.status = "success";
-                that.$set(that.kpis, index, kpi);
-                kpi.score_calculation_type = that.method[p];
+                self.$set(self.kpis, index, kpi);
+                kpi.score_calculation_type = self.method[p];
+                $('.add_kpi_' + index).button('reset')
             },
             error: function (jqXHR) {
                 //alert('failed');
                 requestcenterHideNotification();
-                var html = ''
-                if (jqXHR.responseJSON['exception']) {
-                    html = '<ol class="text-left">\n';
-                    Object.keys(jqXHR.responseJSON['exception']).forEach(function (key) {
-                        html += '<li>"' + key + '": ' + jqXHR.responseJSON['exception'][key] + '</li>\n';
-                    });
-                    html += '</ol>\n';
+                var title_msg_error = "Thêm KPI thất bại"
+                if (jqXHR.responseJSON){
+                    if (jqXHR.responseJSON['exception']) {
+                        var msg_error
+                        Object.keys(jqXHR.responseJSON['exception']).forEach(function (key) {
+                            msg_error =  key + ' : ' + jqXHR.responseJSON['exception'][key];
+                            self.info_msg_box.array_msg.push(msg_error)
+                        });
+                    }
+                    // if(jqXHR.responseJSON['message']){
+                    //     title_msg_error = jqXHR.responseJSON['message']
+                    // }
+                }else{
+                    self.info_msg_box.array_msg.push(jqXHR['message'])
                 }
-                swal({
-                    title: '<h4 class>' + jqXHR.responseJSON['message'] + '</h4>',
-                    html: html,
-                    type: 'error',
-                    animation: false
-                });
+                self.info_msg_box.show_infor_msg = true;
+                self.info_msg_box.type_msg = "error";
+                self.info_msg_box.tite_msg = title_msg_error
                 try {
-                    kpi.msg = jqXHR.responseJSON['message'];
+                    kpi.msg.push({
+                        'field_name': '',
+                        'message': jqXHR['message']
+                    });
                 } catch (err) {
                 }
                 kpi.status = "failed";
-                that.$set(that.kpis, index, kpi);
+                self.$set(self.kpis, index, kpi);
+                $('.add_kpi_' + index).button('reset')
             },
 
             contentType: "application/json"
