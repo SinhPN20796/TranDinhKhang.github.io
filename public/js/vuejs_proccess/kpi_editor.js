@@ -1861,8 +1861,6 @@ Vue.component('kpi-owner', {
                 return false;
             }
 
-            this.update_assigned_user_data(selected_item);
-            // assign/kpi/
             var data={
                 user: to_user_id
             };
@@ -2052,36 +2050,21 @@ Vue.component('kpi-progressbar', {
             }
         },
 
-        check_quarter_plan: function (kpi, type) {
+        check_quarter_plan: function (kpi) {
             var that = this;
-            var quarter = "one";
-            switch (that.current_quarter.quarter) {
-                case 1:
-                    quarter = "one";
-                    break;
-                case 2:
-                    quarter = "two";
-                    break;
-                case 3:
-                    quarter = "three";
-                    break;
-                case 4:
-                    quarter = "four";
-                    break;
-                default:
-                    break;
+            var quarter_obj = {
+                1:"one",
+                2:"two",
+                3:"three",
+                4:"four"
+            };
+            var quarter_plan = kpi['quarter_' + quarter_obj[that.current_quarter.quarter] + '_target'];
+            if (kpi.score_calculation_type == 'sum' || that.kpi.score_calculation_type == 'average' || kpi.score_calculation_type == 'most_recent'){
+                if ( kpi.target != quarter_plan) {
+                    return true;
+                }
+                return false;
             }
-            var quarter_plan = kpi['quarter_' + quarter + '_target'];
-            var month_1_target = kpi.month_1_target ? kpi.month_1_target : 0;
-            var month_2_target = kpi.month_2_target ? kpi.month_2_target : 0;
-            var month_3_target = kpi.month_3_target ? kpi.month_3_target : 0;
-            console.log('var actual_target = parseFloat((month_1_target + month_2_target + month_3_target).toFixed(5));'
-                + typeof month_1_target + '|'
-                + typeof month_2_target + '|'
-                + typeof month_3_target + '|'
-            )
-            var actual_target = parseFloat((month_1_target + month_2_target + month_3_target).toFixed(5));
-            return kpi.score_calculation_type == 'sum' && (kpi.target != quarter_plan || kpi.target != actual_target);
         },
         // moved to mixin
         // kpi_ready: function (kpi_id, controller_prefix, ready) {
@@ -3288,7 +3271,7 @@ var v = new Vue({
 
             var jqXhr=this.add_kpi(false, kpi_data);
             // additional success callback function
-            jqXhr.success(function(){
+            jqXhr.done(function(){
                 that.$set(that.kpi_list[parent_kpi_id], 'has_child', true);
                 that.$set(that.kpi_list[parent_kpi_id], 'children_data', {'parent_score_auto': true});
                 // $('#btn-kpi-toggle'+kpi).children('i.fa').removeClass("fa-angle-double-right").addClass("fa-angle-double-down");
