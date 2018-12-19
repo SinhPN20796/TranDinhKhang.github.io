@@ -1939,6 +1939,14 @@ Vue.component('kpi-progressbar', {
         },
     },
     methods:{
+        update_kpi_property:function(kpi, property_name, input_data = []){
+            var that = this;
+            that.$root.$emit('update_data_kpi', kpi, property_name, input_data);
+            that.$root.$emit('update_kpi_property', this.kpi, property_name);
+        },
+        update_data_kpi:function(kpi, property_name, input_data){
+            that.$root.$emit('update_data_kpi', kpi, property_name, input_data);
+        },
         triggerAdjustPerformanceThreshold(kpi_id){
             this.$root.$emit('adjust_performance_level',kpi_id)
         },
@@ -2065,24 +2073,6 @@ Vue.component('kpi-progressbar', {
                 }
                 return false;
             }
-        },
-        // moved to mixin
-        // kpi_ready: function (kpi_id, controller_prefix, ready) {
-        //     kpi_ready(kpi_id, controller_prefix, ready);
-        // },
-        update_score_and_ready: function(kpi, controller_prefix, ready){
-            // this.$emit('update_score_and_ready', kpi, controller_prefix, ready);
-            this.$root.$emit('update_score_and_ready_event', kpi, controller_prefix, ready);
-        },
-        update_month_target_and_ready: function (kpi, check_disabled, controller_prefix, ready) {
-            this.$root.$emit('update_month_target_and_ready_event', kpi, check_disabled, controller_prefix, ready);
-
-        },
-        update_quarter_target_and_ready:function(kpi, controller_prefix, ready){
-            this.$root.$emit('update_quarter_target_and_ready_event', kpi, controller_prefix, ready);
-        },
-        update_score_calculation_type_and_ready:function(kpi, controller_prefix, ready){
-            this.$root.$emit('update_score_calculation_type_and_ready_event', kpi, controller_prefix, ready);
         },
 
 
@@ -2286,6 +2276,15 @@ Vue.component('kpi-row', {
 
     },
     methods:{
+        update_kpi_property:function(kpi, property_name, input_data = []){
+            var that = this;
+            that.$root.$emit('update_data_kpi', kpi, property_name, input_data);
+            that.$root.$emit('update_kpi_property', this.kpi, property_name);
+        },
+
+        update_data_kpi:function(kpi, property_name, input_data){
+            that.$root.$emit('update_data_kpi', kpi, property_name, input_data);
+        },
 
         is_root_kpi: function (kpi) {
 
@@ -2399,83 +2398,7 @@ Vue.component('kpi-row', {
 
 
         },
-        save_action: function (kpi, key, controller_prefix) {
-            this.$root.$emit('save_action', kpi, key, controller_prefix);
-            this.delete_temp(kpi, key);
-        },
-        /***
-         * To save temp value of a kpi to temp_value object follow this structure:
-         * 'temp_value': {
-             *      'kpi_id1: {
-             *          'key1': {
-             *              'prop1': ...,
-             *              'prop2: ...,
-             *              ....
-             *           },
-             *          'key2': {
-             *              'prop1': ...,
-             *              'prop2: ...,
-             *              ....
-             *          },
-             *          ....
-             *      },
-             *      'kpi_id2': ....
-             * }
-         * kpi: kpi in kpi_list
-         * key: a unique key in temp_value. Example: to save all value of quarter target include:
-         'quarter_one_target', 'quarter_two_target', 'quarter_three_target', 'quarter_four_target', you can use:
-         'quarter_target': {
-                        'quarter_one_target': ....
-                        'quarter_two_target': ....
-                        'quarter_three_target': ....
-                        'quarter_four_target': ....
-                    }.
-         When you add a key, make sure that your key is different from all other keys.
-         * prop: property of object specific by key. Example for key 'quarter_target' prop will be 'quarter_one_target', ....
-         *
-         * ***/
-        tempsave_value: function (kpi, prop, key) {
-            var that = this;
-            kpi_id = kpi['id'];
-            if (!(that.temp_value.hasOwnProperty(kpi_id))) {
-                that.temp_value[kpi_id] = {};
-            }
-            if (!(that.temp_value[kpi_id].hasOwnProperty(key))) {
-                that.temp_value[kpi_id][key] = {};
-            }
-            if (that.temp_value[kpi_id][key][prop]) {
-                return;
-            }
-            else {
-                if (typeof kpi[prop] == 'undefined' || kpi[prop] == "")
-                    that.temp_value[kpi_id][key][prop] = null;
-                else {
-                    that.temp_value[kpi_id][key][prop] = kpi[prop];
-                }
-            }
-        },
-        /***
-         * To delete value of the object specific by key when you perform cancel of save action
-         *
-         ***/
-        delete_temp: function (kpi, key) {
-            var that = this;
-            kpi_id = kpi['id'];
-            delete that.temp_value[kpi_id][key];
-        },
-        /***
-         * To revert value from temp_value to current kpi values
-         *
-         ***/
-        cancel_action: function (kpi, key, controller_prefix) {
-            var that = this;
-            kpi_id = kpi['id'];
-            for (prop in that.temp_value[kpi_id][key]) {
-                kpi[prop] = that.temp_value[kpi_id][key][prop];
-            }
-            that.delete_temp(kpi, key);
-            kpi_ready(kpi['id'], controller_prefix, false);
-        },
+
         change_group: function(kpi){
             this.$root.$emit('change_group', kpi);
         },
@@ -2935,23 +2858,13 @@ var v = new Vue({
         // // https://vuejs.org/v2/guide/migration.html#Events
         // // The events option has been removed.
         // // Event handlers should now be registered in the created hook instead.
+
+        this.$on('update_kpi_property', function (kpi, property_name,) {
+            this.update_kpi_property(kpi, property_name)
+        });
         this.$on('copy_monthly_goal',function(kpi){
             that.copy_monthly_goal(kpi)
-        })
-        // this.$on('update_score_and_ready_event', function(){alert('update_score_and_ready_event callback')}); // this work when in component we use: this.$root.$emit()
-        this.$on('update_score_and_ready_event', function(kpi, controller_prefix, ready){
-            that.update_score_and_ready(kpi, controller_prefix, ready);
         });
-        this.$on('update_month_target_and_ready_event', function(kpi, check_disabled, controller_prefix, ready) {
-            that.update_month_target_and_ready(kpi, check_disabled, controller_prefix, ready);
-        });
-        this.$on('update_quarter_target_and_ready_event', function(kpi, controller_prefix, ready) {
-            that.update_quarter_target_and_ready(kpi, controller_prefix, ready);
-        });
-        this.$on('update_score_calculation_type_and_ready_event', function(kpi, controller_prefix, ready) {
-            that.update_score_calculation_type_and_ready(kpi, controller_prefix, ready);
-        });
-
         this.$on('change_category', function(kpi_id) {
             that.change_category(kpi_id);
         });
@@ -2979,10 +2892,6 @@ var v = new Vue({
 
         this.$on('update_list_child_kpis', function(parent_kpi, list_children_kpis) {
             that.update_list_child_kpis(parent_kpi, list_children_kpis);
-        });
-
-        this.$on('save_action', function(kpi, key, controller_prefix) {
-            that.save_action(kpi, key, controller_prefix);
         });
 
         this.$on('change_group', function(kpi) {
@@ -3069,8 +2978,91 @@ var v = new Vue({
         this.$on('toggle_weight_kpi', function (kpi_id) {
             that.toggle_weight_kpi(kpi_id);
         });
+
+        this.$on('update_data_kpi', function (kpi,  property_name, input_data) {
+            that.update_data_kpi(kpi,  property_name, input_data);
+        });
     },
     methods: {
+        update_data_kpi: function(kpi,  property_name, input_data){
+            var that = this;
+            switch (property_name) {
+                case 'quarter_target':
+                    kpi.quarter_one_target = input_data[0].value;
+                    kpi.quarter_two_target = input_data[1].value;
+                    kpi.quarter_three_target = input_data[2].value;
+                    kpi.quarter_four_target = input_data[3].value;
+                    break;
+                case 'month_target':
+                    kpi.month_1_target = input_data[0].value;
+                    kpi.month_2_target = input_data[1].value;
+                    kpi.month_3_target = input_data[2].value;
+                    break;
+                case 'month_real':
+                    kpi.month_1 = input_data[0].value;
+                    kpi.month_2 = input_data[1].value;
+                    kpi.month_3 = input_data[2].value;
+                    break;
+            }
+            return kpi;
+        },
+        update_kpi_property: function(kpi, property_name, callback = null){
+            var that = this;
+            var url='';
+            switch (property_name) {
+                case 'quarter_target':
+                    url = `/api/v2/kpi/${kpi.id}/update-quarter-target/` ; // Endpoint update four quarters;
+                    break;
+                case 'month_target':
+                    url = COMMON.LinkKPISevices ;// Endpoint update 3 months target;
+                    kpi.command = 'update_month_target';
+                    break;
+                case 'month_real':
+                    url = '/performance/kpi/update-score/' ; // Endpoint update 3 months score;
+                    break;
+                case 'score_calculation_type':
+                    url = `/api/v2/kpi/${kpi.id}/update-score-calculation-type/` ;// Endpoint update score_calculation;
+                    break;
+                case 'operator':
+                     url = '/performance/kpi/update-score/' ; // Endpoint update operator;
+                    break;
+            }
+            if(property_name == 'month_target' && !kpi.enable_edit && !that.organization.allow_edit_monthly_target){
+                guide_requestcenter(gettext("You don't have permission to edit month target"));
+                return;
+            }else if(property_name == 'month_real' && !kpi.enable_review) {
+                guide_requestcenter(gettext("Not allowed to modify KPI, please check if any wrong data in KPI"));
+                return;
+            }
+            cloudjetRequest.ajax({
+                url: url,
+                type: 'POST',
+                data: JSON.stringify(kpi),
+                contentType: "application/json",
+                success: function(data){
+                    that.kpi_list[kpi.id] = Object.assign(that.kpi_list[kpi.id], data);
+                    if(property_name == 'month_real'){
+                        that.kpi_list[kpi.id] = Object.assign(that.kpi_list[kpi.id], data.kpi);
+                        that.$set(that.kpi_list[kpi.id], 'latest_score', data.score);
+                        that.$set(that.kpi_list[kpi.id], 'real', data.real);
+                        that.kpi_list[kpi.id].target = data.kpi.target;
+                        that.triggeredReloadTargetPerformance(kpi.id);
+                        that.reload_kpi(kpi.id);
+                    }
+                    that.get_current_employee_performance();
+                    $(".save-btn-calculation").hide();
+                    success_requestcenter(gettext("Update successful!"));
+                },
+                error: function(jqxhr){
+                },
+            });
+            if (typeof callback === 'function') {
+                callback();
+            }
+        },
+
+
+
         to_percent: function (val, total) {
             if (total > 0) {
                 return val * 100 / total;
@@ -5426,52 +5418,6 @@ var v = new Vue({
             }
             self.update_kpi(kpi);
         },
-        update_quarter_target: function (kpi, callback = null) {
-            var that = this;
-            cloudjetRequest.ajax({
-                type: "POST",
-                url: `/api/v2/kpi/${kpi.id}/update-quarter-target/`,
-                data: JSON.stringify(kpi),
-                success: function (data) {
-                    that.kpi_list[kpi.id] = Object.assign(that.kpi_list[kpi.id], data);
-
-                    for (i = 1; i <= 4; i++) {
-                        $('#qtip' + kpi.id + '_' + i).qtip({
-                            content: {
-                                text: $('#qtip' + kpi.id + '_' + i + ' input').val()
-                            },
-                            style: {
-                                classes: 'qtip-green'
-                            }
-                        });
-                    }
-
-                    success_requestcenter(gettext("Update successful!"));
-                },
-                contentType: "application/json"
-            });
-            if (typeof callback === 'function') {
-                callback();
-            }
-        },
-        update_score_calculation_type: function (kpi, callback = null) {
-            var that = this;
-            cloudjetRequest.ajax({
-                type: "POST",
-                url: `/api/v2/kpi/${kpi.id}/update-score-calculation-type/`,
-                data: JSON.stringify(kpi),
-                success: function (data) {
-                    that.kpi_list[kpi.id] = Object.assign(that.kpi_list[kpi.id], data);
-                    that.get_current_employee_performance();
-
-                    success_requestcenter(gettext("Update successful!"));
-                },
-                contentType: "application/json"
-            });
-            if (typeof callback === 'function') {
-                callback();
-            }
-        },
         set_month_target_from_last_quarter_three_months_result: function (kpi_id, user_id, kpi_unique_key, last_quarter_id) {
             // Khang build this function
             //       Pace.start(); // Monitor ajax
@@ -5508,7 +5454,6 @@ var v = new Vue({
                                 kpi_object['month_1_target'] = kpi_object['month_2_target'] = kpi_object['month_3_target'] = new_target;
 
                                 that.$set(that.$data, 'kpi_list[' + kpi_id + ']', kpi_object);
-                                that.update_month_target(that.kpi_list[kpi_id]);
                                 sweetAlert(gettext("ACTION COMPLETED"), gettext("The KPI is successfully updated"), "success");
                             }
                         }
@@ -5529,37 +5474,6 @@ var v = new Vue({
 
             // Ref:https://vuejs.org/v2/api/#vm-watch
         },
-        update_month_target: function (kpi, check_disabled, callback = null) {
-            if (!check_disabled) {
-                var that = this;
-                //  $('#loading-gif' + kpi.id).toggleClass('loading-gif');
-                kpi.command = 'update_month_target';
-                cloudjetRequest.ajax({
-                    type: "POST",
-                    url: COMMON.LinkKPISevices,
-                    data: JSON.stringify(kpi),
-                    success: function (data) {
-                        //   console.log(data);
-                        that.kpi_list[kpi.id] = Object.assign(that.kpi_list[kpi.id], data);
-
-                        that.get_current_employee_performance();
-
-                        success_requestcenter(gettext("Update successful!"));
-                    },
-                    error: function () {
-
-                    },
-                    contentType: "application/json"
-
-                });
-
-            } else {
-                error_requestcenter("Error[403] " + gettext("You don't have permisson"));
-            }
-            if (typeof callback === 'function') {
-                callback();
-            }
-        },
         copy_monthly_goal: function (kpi) {
             var that = this;
             swal({
@@ -5575,7 +5489,7 @@ var v = new Vue({
                 kpi.month_1_target = kpi.target;
                 kpi.month_2_target = kpi.target;
                 kpi.month_3_target = kpi.target;
-                that.update_month_target(kpi);
+                that.update_kpi_property(kpi, 'month_target');
             })
         },
         findRootKPI: function(kpi_id){
@@ -5587,94 +5501,6 @@ var v = new Vue({
             if (parseInt(child_id) !== root_id) {
                 $('#kpi_reload' + root_id).click()
             }
-        },
-        update_score: function (kpi, update_quarter_target, callback = null) {
-            //alert(kpi.id)
-            //this.calculate_total_weight();
-            var that = this;
-            var okay_to_edit = kpi.enable_review && (!isNaN(kpi.month_1_target)) && (!isNaN(kpi.month_2_target)) && (!isNaN(kpi.month_3_target));
-
-            if (!okay_to_edit) {
-                guide_requestcenter(gettext("Not allowed to modify KPI, please check if any wrong data in KPI"));
-            } else {
-
-                if (update_quarter_target != undefined) {
-                    kpi.update_quarter_target = update_quarter_target;
-                }
-                clearTimeout(this.update_timeout);
-
-                //console.log('#loading-gif' + kpi.id)
-//                $('#loading-gif' + kpi.id).toggleClass('loading-gif');
-
-
-                // that.$set(that.kpi_list[kpi.id], 'month_1_target', kpi.month_1_target != '' ? kpi.month_1_target : kpi.get_target)
-                // that.$set(that.kpi_list[kpi.id] , 'month_2_target', kpi.month_2_target != '' ? kpi.month_2_target : kpi.get_target)
-                // that.$set(that.kpi_list[kpi.id], 'month_3_target', kpi.month_3_target != '' ? kpi.month_3_target : kpi.get_target)
-                //
-                // if (that.kpi_list[kpi.id].score_calculation_type == 'sum') {
-                //     var month_1_target = kpi.month_1_target ? kpi.month_1_target : 0;
-                //     var month_2_target = kpi.month_2_target ? kpi.month_2_target : 0;
-                //     var month_3_target = kpi.month_3_target ? kpi.month_3_target : 0;
-                //     that.$set(that.kpi_list[kpi.id], 'target', month_1_target + month_2_target + month_3_target)
-                // }
-
-
-                //console.log(that.kpi_list[kpi.id].month_2_target);
-
-                this.update_timeout = setTimeout(function () {
-                    cloudjetRequest.ajax({
-                        type: "POST",
-                        url: '/performance/kpi/update-score/',
-                        data: kpi,
-                        success: function (data) {
-                            that.$set(that.kpi_list[kpi.id], 'month_1_score', data.kpi.month_1_score)
-                            that.$set(that.kpi_list[kpi.id], 'month_2_score', data.kpi.month_2_score)
-                            that.$set(that.kpi_list[kpi.id], 'month_3_score', data.kpi.month_3_score)
-
-
-                            that.$set(that.kpi_list[kpi.id], 'month_1', data.kpi.month_1)
-                            that.$set(that.kpi_list[kpi.id], 'month_2', data.kpi.month_2)
-                            that.$set(that.kpi_list[kpi.id], 'month_3', data.kpi.month_3)
-                            that.kpi_list[kpi.id].month_1_score = data.kpi.get_month_1_score;
-                            that.kpi_list[kpi.id].month_2_score = data.kpi.get_month_2_score;
-                            that.kpi_list[kpi.id].month_3_score = data.kpi.get_month_3_score;
-
-                            that.$set(that.kpi_list[kpi.id], 'get_month_1_score_icon', data.kpi.get_month_1_score_icon)
-                            that.$set(that.kpi_list[kpi.id], 'get_month_2_score_icon', data.kpi.get_month_2_score_icon)
-                            that.$set(that.kpi_list[kpi.id], 'get_month_3_score_icon', data.kpi.get_month_3_score_icon)
-
-                            that.kpi_list[kpi.id].get_month_1_score_icon = data.kpi.get_month_1_score_icon;
-                            that.kpi_list[kpi.id].get_month_2_score_icon = data.kpi.get_month_2_score_icon;
-                            that.kpi_list[kpi.id].get_month_3_score_icon = data.kpi.get_month_3_score_icon;
-                            //that.$set(that.$data, 'kpi_list[' + kpi.id + ']', data.kpi);
-                            //$('.kpiprogressreview-wrapper').tooltip();
-                            that.$set(that.kpi_list[kpi.id], 'latest_score', data.score)
-                            that.$set(that.kpi_list[kpi.id], 'real', data.real)
-                            that.kpi_list[kpi.id].target = data.kpi.target;
-
-                            that.kpi_list[kpi.id].latest_score = data.score; //JSON.parse(data);
-                            that.kpi_list[kpi.id].real = data.real; //JSON.parse(data);
-                            that.get_current_employee_performance();
-                            that.triggeredReloadTargetPerformance(kpi.id)
-                            that.reload_kpi(kpi.id)
-
-                            success_requestcenter(gettext("Update successful!"));
-                        },
-                        error: function () {
-
-                        },
-                        complete: function (data) {
-                        }
-                    });
-                }, 200);
-
-
-            }
-            if (typeof callback === 'function') {
-                callback();
-            }
-            console.log(callback)
-
         },
 
         complete_review_modal: function () {
@@ -5862,8 +5688,12 @@ var v = new Vue({
         get_backup_month_score: function (index) {
             var self = this;
             var month = self.current_backup.month;
-            var backup_kpis_month_score = self.backup_kpis[index]['month_' + month + '_score'];
-            return backup_kpis_month_score > 0 ? backup_kpis_month_score : null;
+            var backup_kpis_month_score = parseFloat(self.backup_kpis[index]['month_' + month + '_score']);
+            if ($.isNumeric(backup_kpis_month_score)){
+                return backup_kpis_month_score.toFixed(2);
+            } else {
+                return null
+            }
         },
         get_backup_month_name: function (month) {
             return self['month_' + month + '_name']
@@ -5871,14 +5701,24 @@ var v = new Vue({
         get_backup_month_target: function (index) {
             var self = this;
             var month = self.current_backup.month;
-            var backup_kpis_month_target = self.backup_kpis[index]['month_' + month + '_target'];
-            return backup_kpis_month_target > 0 ? backup_kpis_month_target.toFixed(2) : null;
+            var backup_kpis_month_target = parseFloat(self.backup_kpis[index]['month_' + month + '_target']);
+            if ($.isNumeric(backup_kpis_month_target)) {
+                return backup_kpis_month_target.toFixed(2);
+            } else {
+                return null
+            }
+
         },
         get_backup_month_real: function (index) {
             var self = this;
             var month = self.current_backup.month;
-            var backup_kpis_month = self.backup_kpis[index]['month_' + month];
-            return backup_kpis_month > 0 ? backup_kpis_month.toFixed(2) : null;
+            var backup_kpis_month = parseFloat(self.backup_kpis[index]['month_' + month]);
+            if($.isNumeric(backup_kpis_month)){
+                return backup_kpis_month.toFixed(2);
+            }else {
+                return null
+            }
+
         },
         update_month_backup_display: function (month) {
             var self = this;
@@ -6128,7 +5968,7 @@ var v = new Vue({
         },
 
         complete_review_confirm: function () {
-            that = this;
+            var that = this;
             $('#complate-review-modal').modal('hide');
             var temp = $('#btn-complete-review').html();
             $('#btn-complete-review').html(gettext('Downloading! Please wait ... '));
@@ -6163,7 +6003,7 @@ var v = new Vue({
         },
 
         capture_and_download: function(){
-            that = this;
+            var that = this;
             var temp = $('#btn-complete-review').html();
 
             var wd = window.open("/performance/report/#/?user_id=" + COMMON.OrgUserId + "&quarter_id=" + that.quarter_by_id.id);
@@ -6262,38 +6102,6 @@ var v = new Vue({
             this.is_child = !this.parentKPIs[kpi_id];
         },
 
-
-        /***
-         * To call functions to excute the save action
-         * kpi: kpi in kpi_list
-         * key: a unique key to specific which function will be call arcording to value of this key
-         * controller_prefix: controller_prefix to use in kpi_ready function
-         ***/
-        save_action: function (kpi, key, controller_prefix) {
-            var that = this;
-            switch (key) {
-                case 'quarter_target':
-                    that.update_quarter_target(kpi);
-                    break;
-                case 'month_score':
-                    that.update_score(kpi);
-                    break;
-                case 'month_target':
-                    that.update_month_target(kpi, (!kpi.enable_edit && !that.organization.allow_edit_monthly_target));
-                    break;
-                case 'score_calculation':
-                    that.update_quarter_target(kpi);
-                    break;
-                case 'operator':
-                    that.update_score(kpi);
-                    break;
-                default:
-                    return;
-            }
-            // that.delete_temp(kpi, key);
-            kpi_ready(kpi['id'], controller_prefix, false);
-        },
-
         average_3_month: function (employee_performance) {
             var count = 0;
             var total = 0;
@@ -6337,24 +6145,6 @@ var v = new Vue({
 
                 }
             });
-        },
-
-        update_score_and_ready: function(kpi, controller_prefix, ready){
-            this.update_score(kpi);
-            this.kpi_ready(kpi.id, controller_prefix, ready);
-        },
-
-        update_month_target_and_ready: function (kpi, check_disabled, controller_prefix, ready) {
-            this.update_month_target(kpi, check_disabled);
-            this.kpi_ready(kpi.id, controller_prefix, ready);
-        },
-        update_quarter_target_and_ready: function(kpi, controller_prefix, ready) {
-            this.update_quarter_target(kpi);
-            this.kpi_ready(kpi.id, controller_prefix, ready);
-        },
-        update_score_calculation_type_and_ready: function (kpi, controller_prefix, ready) {
-            this.update_score_calculation_type(kpi);
-            this.kpi_ready(kpi.id, controller_prefix, ready);
         },
 
         update_evidence_event_callback: function (kpi_id, month, count){
