@@ -1525,7 +1525,7 @@ ul.success {
     color: #008b8b;
     background-color: #e4e4e4;
     border-bottom: 1px solid #fff;
-    text-transform: uppercase;
+    /*text-transform: uppercase;*/
 }
 
 .group-header #hide {
@@ -5391,9 +5391,3 @@ button.close{
     vertical-align: unset!important;
 }
 
-.kpi-inp-incharge .autocomplete__results{
-    position: relative!important;
-}
-.autocomplete__inputs .input-change-owner {
-    height: 36px;
-}
