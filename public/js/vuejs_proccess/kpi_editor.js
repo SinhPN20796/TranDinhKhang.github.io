@@ -4934,7 +4934,7 @@ var v = new Vue({
             var month = self.current_backup.month;
             var backup_kpis_month_score = parseFloat(self.backup_kpis[index]['month_' + month + '_score']);
             if ($.isNumeric(backup_kpis_month_score)){
-                return backup_kpis_month_score.toFixed(2);
+                return backup_kpis_month_score;
             } else {
                 return null
             }
@@ -4969,12 +4969,6 @@ var v = new Vue({
             if (month) {
                 self.$set(self.employee_performance, 'month_' + month + '_backup', true);
             }
-        },
-        formatBackupKpis: function (val) {
-            if (typeof val == 'number') {
-                return val.toFixed(2) + "%";
-            }
-            return ""
         },
         delete_backup: function (index) {
             var self = this;
