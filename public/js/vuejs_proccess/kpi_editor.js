@@ -1912,19 +1912,19 @@ Vue.component('kpi-row', {
             /*TODO:
             * fix backend to use only contentType = "application/json; charset=utf-8";
             * */
-            // let contentType = "application/json; charset=utf-8";
-            // let post_data = JSON.stringify(data);
-            // if (update_type == 'unlink_align_up_kpi'){
-            //     contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
-            //     // contentType = 'multipart/form-data';
-            //     post_data = data;
-            // }
+            let contentType = "application/json; charset=utf-8";
+            let post_data = JSON.stringify(data);
+            if (update_type == 'unlink_align_up_kpi'){
+                contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
+                // contentType = 'multipart/form-data';
+                post_data = data;
+            }
 
             let jqxhr = cloudjetRequest.ajax({
                 url: url,
                 type: 'POST',
-                data: JSON.stringify(data),
-                // contentType: contentType,
+                data: post_data,
+                contentType: contentType,
                 success: function(updated_kpi_data){},
                 error: function(jqxhr){
                     alert('error on update kpi');
