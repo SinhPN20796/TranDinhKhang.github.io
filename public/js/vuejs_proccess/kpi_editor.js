@@ -191,6 +191,7 @@ Vue.mixin({
         _reload_kpi:function(kpi_id, top_level=true, reset_childs=0){
             let that = this; // depend on context, usually a kpi-row component
             let parent_kpi_id = kpi_id;
+            let reload_effect = getUrlVars()['reload-effect'];
 
 
 
@@ -222,7 +223,20 @@ Vue.mixin({
                         let reloaded_kpi = kpi_data.kpi;
                         // reloaded_kpi.reset_childs = reset_childs;
                         that.kpi = reloaded_kpi;
+
                     }
+
+
+                    //UI
+                    if (reload_effect){
+                        that.$nextTick(function(){
+                            $(that.$refs.kpi_row).addClass('row-reload-effect');
+                            setTimeout(function(){
+                                $(that.$refs.kpi_row).removeClass('row-reload-effect');
+                            }, 1000);
+                        });
+                    }
+
 
 
                     // let format_data = kpi_data.kpi;
@@ -699,6 +713,7 @@ Vue.component('kpi-config', {
         'remove_kpi_by_kpi_row',
         'is_parent_kpi',
         'update_kpi_with_score_affectability',
+        'unlink_align_up_kpi',
         // 'reload_kpi',// warning
 
     ],
@@ -785,18 +800,6 @@ Vue.component('kpi-config', {
             });
 
         },
-        unlink_align_up_kpi: function () {
-            var _this = this;
-             if (confirm(gettext('Are you sure you want to unlink this KPI') + "?")) {
-                var jqxhr = this.update_kpi_with_score_affectability('unlink_align_up_kpi');
-                jqxhr.done(function(){
-                    _this._reload_kpi(_this.kpi.id);
-                    sweetAlert(gettext("ACTION COMPLETED"), gettext("The KPI is successfully unlinked"), "success");
-                });
-
-            }
-        },
-
         copy_data_to_children:function () {
             let that = this;
             swal({
@@ -1646,7 +1649,8 @@ Vue.component('kpi-row', {
             add_child_kpi_from_kpi_row: this.add_child_kpi,
             remove_kpi_by_kpi_row: this.remove_kpi,
             is_parent_kpi: this.is_parent_kpi,
-            update_kpi_with_score_affectability: this.update_kpi_with_score_affectability
+            update_kpi_with_score_affectability: this.update_kpi_with_score_affectability,
+            unlink_align_up_kpi: this.unlink_align_up_kpi,
         }
     },
     created: function(){
@@ -1674,6 +1678,9 @@ Vue.component('kpi-row', {
         this.$on('child_kpi_reviewed', function(){
 
         });
+        this.$on('child_unlinked', function () {
+            that.on_child_unlinked();
+        })
 
 
     },
@@ -1734,7 +1741,23 @@ Vue.component('kpi-row', {
 
     },
     methods:{
+        unlink_align_up_kpi: function () {
+            let that = this;
+            if (confirm(gettext('Are you sure you want to unlink this KPI') + "?")) {
+                var jqxhr = this.update_kpi_with_score_affectability('unlink_align_up_kpi');
+                jqxhr.done(function(){
+                    sweetAlert(gettext("ACTION COMPLETED"), gettext("The KPI is successfully unlinked"), "success");
+                    that.$parent.$emit('child_unlinked');
+                });
 
+            }
+        },
+        on_child_unlinked: function() {
+            // let that = this;
+            let top_level = false;
+            this.reload_kpi(true, reload_childs = true);
+            // this.$parent.$emit('child_unlinked', kpi.id)
+        },
 
         update_quarter_x_target: function(update_data){
             let data = this.kpi;
@@ -1938,6 +1961,7 @@ Vue.component('kpi-row', {
             //1. reload kpi data (score, ...)
             // we reload kpi data from server instead of using responsed data (to eliminate bug of wrong data structure)
             that.reload_kpi(top_level, reload_childs);
+
             // 2. notify parent kpi (or kpi group) to reload kpi's score (or employee's score)
             that.$parent.$emit('child_kpi_score_updated');
         },
