@@ -1678,8 +1678,8 @@ Vue.component('kpi-row', {
         this.$on('child_kpi_reviewed', function(){
 
         });
-        this.$on('child_unlinked', function () {
-            that.on_child_unlinked();
+        this.$on('child_unlinked', function (kpi_id) {
+            that.on_child_unlinked(kpi_id);
         })
 
 
@@ -1747,16 +1747,13 @@ Vue.component('kpi-row', {
                 var jqxhr = this.update_kpi_with_score_affectability('unlink_align_up_kpi');
                 jqxhr.done(function(){
                     sweetAlert(gettext("ACTION COMPLETED"), gettext("The KPI is successfully unlinked"), "success");
-                    that.$parent.$emit('child_unlinked');
+                    that.$parent.$emit('child_unlinked', that.kpi.id); // remove kpi row con tu kpi row cha
                 });
 
             }
         },
-        on_child_unlinked: function() {
-            // let that = this;
-            let top_level = false;
-            this.reload_kpi(true, reload_childs = true);
-            // this.$parent.$emit('child_unlinked', kpi.id)
+        on_child_unlinked: function(kpi_id) {
+            this.remove_child_kpi(kpi_id)
         },
 
         update_quarter_x_target: function(update_data){
@@ -2147,7 +2144,7 @@ Vue.component('kpi-row', {
                     return current_kpi.id == kpi_id
                 });
                 if (found_index != -1){
-                    this.child_kpis.pop(found_index);
+                    this.child_kpis.splice(found_index,1);
                 }
             }
 
