@@ -4281,6 +4281,7 @@ var v = new Vue({
             }
         },
 
+		
         calculate_total_weight_group: function () {
             var that = this;
             that.total_weight_by_user = {};
