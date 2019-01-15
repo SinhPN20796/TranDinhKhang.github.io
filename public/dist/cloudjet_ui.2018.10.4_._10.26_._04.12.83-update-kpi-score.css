@@ -590,6 +590,11 @@
 
 
 
+
+
+
+
+
 .search-user-result-list__header[data-v-041bca5c] {
   text-align: left;
   color: #ababab;
@@ -1225,6 +1230,7 @@
 
 .todopage-list-wrapper[data-v-1f9f2b1b] {
   margin-top: 10px;
+  margin-bottom: 10px;
   width: 100%;
 }
 
