@@ -197,13 +197,8 @@ Vue.component('decimal-input-edit-target', {
     },
     methods: {
         check_number: function (e){
-            // With Firefox e.keyCode alway return 0
-            var charCode = e.which || e.keyCode;
-            var _number = String.fromCharCode(charCode);
-
-            // For firefox, include 'Arrow left, arrow right, backspace, delete'.
-            var controlKeyAllowPress = [37, 39, 8, 46];
-            if ('0123456789.'.indexOf(_number) !== -1 || controlKeyAllowPress.indexOf(charCode) !== -1) {
+            var _number = String.fromCharCode(e.keyCode);
+            if ('0123456789.'.indexOf(_number) !== -1) {
                 return _number;
             }
             e.preventDefault();
@@ -276,13 +271,8 @@ Vue.component('modal-edit-target', {
                 evt.stopPropagation();
             },
             check_number: function(e){
-                // With Firefox e.keyCode alway return 0
-                var charCode = e.which || e.keyCode;
-                var _number = String.fromCharCode(charCode);
-
-                // For firefox, include 'Arrow left, arrow right, backspace, delete'.
-                var controlKeyAllowPress = [37, 39, 8, 46];
-                if ('0123456789.'.indexOf(_number) !== -1 || controlKeyAllowPress.indexOf(charCode) !== -1) {
+                var _number = String.fromCharCode(e.keyCode);
+                if ('0123456789.'.indexOf(_number) !== -1) {
                     return _number;
                 }
                 e.preventDefault();
@@ -321,8 +311,8 @@ Vue.component('modal-edit-target', {
                 // lấy các target quý
                 var current_quarter = self.edit_target_data.current_quarter
                 self.tempMonth = [1,2,3].map(function(i){
-                     self.edit_target_data.months_target["quarter_" + current_quarter]["month_" + i] = !$.isNumeric(self.edit_target_data.months_target["quarter_" + current_quarter]["month_" + i])?null:parseFloat(self.edit_target_data.months_target["quarter_" + current_quarter]["month_" + i])
-                     return i = self.edit_target_data.months_target["quarter_" + current_quarter]["month_" + i]
+                     self.edit_target_data.months_target["quarter_" + current_quarter][`month_${i}_target`] = !$.isNumeric(self.edit_target_data.months_target["quarter_" + current_quarter][`month_${i}_target`])?null:parseFloat(self.edit_target_data.months_target["quarter_" + current_quarter][`month_${i}_target`])
+                     return i = self.edit_target_data.months_target["quarter_" + current_quarter][`month_${i}_target`];
                 })
 
                 if (this.is_correct_follow_score_calculation_type ) {
@@ -424,9 +414,9 @@ Vue.component('modal-edit-target', {
                     all_quarter[i] = self.edit_target_data['quarter_' +i] = !$.isNumeric(self.edit_target_data['quarter_' +i])?null:parseFloat(self.edit_target_data['quarter_' +i])
                     console.log(i)
                     // chứa data 3 tháng sắp xếp theo quý
-                    data_quarter[i]['month_1'] = self.edit_target_data.months_target['quarter_' +i].month_1 = !$.isNumeric(self.edit_target_data.months_target['quarter_' +i].month_1)?null:parseFloat(self.edit_target_data.months_target['quarter_' +i].month_1)
-                    data_quarter[i]['month_2'] = self.edit_target_data.months_target['quarter_' +i].month_2 = !$.isNumeric(self.edit_target_data.months_target['quarter_' +i].month_2)?null:parseFloat(self.edit_target_data.months_target['quarter_' +i].month_2)
-                    data_quarter[i]['month_3'] = self.edit_target_data.months_target['quarter_' +i].month_3 = !$.isNumeric(self.edit_target_data.months_target['quarter_' +i].month_3)?null:parseFloat(self.edit_target_data.months_target['quarter_' +i].month_3)
+                    data_quarter[i]['month_1_target'] = self.edit_target_data.months_target['quarter_' +i].month_1_target = !$.isNumeric(self.edit_target_data.months_target['quarter_' +i].month_1_target)?null:parseFloat(self.edit_target_data.months_target['quarter_' +i].month_1_target)
+                    data_quarter[i]['month_2_target'] = self.edit_target_data.months_target['quarter_' +i].month_2_target = !$.isNumeric(self.edit_target_data.months_target['quarter_' +i].month_2_target)?null:parseFloat(self.edit_target_data.months_target['quarter_' +i].month_2_target)
+                    data_quarter[i]['month_3_target'] = self.edit_target_data.months_target['quarter_' +i].month_3_target = !$.isNumeric(self.edit_target_data.months_target['quarter_' +i].month_3_target)?null:parseFloat(self.edit_target_data.months_target['quarter_' +i].month_3_target)
                 }
                 // step 2 tính toán total 4 quý và 12 tháng theo 3 pp phân bổ sum, average, most_recent_quarter
                 total_quarter[0] = calculateYearTotal(all_quarter)
@@ -528,13 +518,8 @@ var targetPage = new Vue({
             evt.stopPropagation();
         },
         check_number: function(e){
-            // With Firefox e.keyCode alway return 0
-            var charCode = e.which || e.keyCode;
-            var _number = String.fromCharCode(charCode);
-
-            // For firefox, include 'Arrow left, arrow right, backspace, delete'.
-            var controlKeyAllowPress = [37, 39, 8, 46];
-            if ('0123456789.'.indexOf(_number) !== -1 || controlKeyAllowPress.indexOf(charCode) !== -1) {
+            var _number = String.fromCharCode(e.keyCode);
+            if ('0123456789.'.indexOf(_number) !== -1) {
                 return _number;
             }
             e.preventDefault();
@@ -788,33 +773,33 @@ var targetPage = new Vue({
         getMonthsTarget: function (item) { // tao field thang theo tung quy
             var temp_months_target = {
                 quarter_1: {
-                    month_1: '',
-                    month_2: '',
-                    month_3: ''
+                    month_1_target: '',
+                    month_2_target: '',
+                    month_3_target: ''
                 },
                 quarter_2: {
-                    month_1: '',
-                    month_2: '',
-                    month_3: ''
+                    month_1_target: '',
+                    month_2_target: '',
+                    month_3_target: ''
                 },
                 quarter_3: {
-                    month_1: '',
-                    month_2: '',
-                    month_3: ''
+                    month_1_target: '',
+                    month_2_target: '',
+                    month_3_target: ''
                 },
                 quarter_4: {
-                    month_1: '',
-                    month_2: '',
-                    month_3: ''
+                    month_1_target: '',
+                    month_2_target: '',
+                    month_3_target: ''
                 }
             }
             if (item.year_data != undefined && item.year_data.months_target) {
                 Object.assign(temp_months_target, item.year_data.months_target);
             }
             var i = this.get_current_quarter
-            temp_months_target['quarter_' + i].month_1 = item.month_1_target == undefined ? "" : item.month_1_target;
-            temp_months_target['quarter_' + i].month_2 = item.month_2_target == undefined ? "" : item.month_2_target;
-            temp_months_target['quarter_' + i].month_3 = item.month_3_target == undefined ? "" : item.month_3_target;
+            temp_months_target['quarter_' + i].month_1_target = item.month_1_target == undefined ? "" : item.month_1_target;
+            temp_months_target['quarter_' + i].month_2_target = item.month_2_target == undefined ? "" : item.month_2_target;
+            temp_months_target['quarter_' + i].month_3_target = item.month_3_target == undefined ? "" : item.month_3_target;
             return temp_months_target
         },
 
@@ -904,9 +889,9 @@ var targetPage = new Vue({
                 }
             }
             var i = kpi.current_quarter
-            tempMonth_1 = kpi.months_target['quarter_' + i].month_1;
-            tempMonth_2 = kpi.months_target['quarter_' + i].month_2;
-            tempMonth_3 = kpi.months_target['quarter_' + i].month_3;
+            tempMonth_1 = kpi.months_target['quarter_' + i].month_1_target;
+            tempMonth_2 = kpi.months_target['quarter_' + i].month_2_target;
+            tempMonth_3 = kpi.months_target['quarter_' + i].month_3_target;
             cloudjetRequest.ajax({
                 type: 'post',
                 url: '/api/v2/kpi/',
@@ -1235,17 +1220,17 @@ var targetPage = new Vue({
                             style: 'center',
                         },{
                             text: gettext("Month 1"),
-                            slug: 'months_target.quarter_1.month_1',
+                            slug: 'months_target.quarter_1.month_1_target',
                             width: '20',
                             style: 'center',
                         },{
                             text: gettext("Month 2"),
-                            slug: 'months_target.quarter_1.month_2',
+                            slug: 'months_target.quarter_1.month_2_target',
                             width: '20',
                             style: 'center',
                         },{
                             text: gettext("Month 3"),
-                            slug: 'months_target.quarter_1.month_3',
+                            slug: 'months_target.quarter_1.month_3_target',
                             width: '20',
                             style: 'center',
                         },{
@@ -1255,17 +1240,17 @@ var targetPage = new Vue({
                             style: 'center',
                         },{
                             text: gettext("Month 4"),
-                            slug: 'months_target.quarter_2.month_1',
+                            slug: 'months_target.quarter_2.month_1_target',
                             width: '20',
                             style: 'center',
                         },{
                             text: gettext("Month 5"),
-                            slug: 'months_target.quarter_2.month_2',
+                            slug: 'months_target.quarter_2.month_2_target',
                             width: '20',
                             style: 'center',
                         },{
                             text: gettext("Month 6"),
-                            slug: 'months_target.quarter_2.month_3',
+                            slug: 'months_target.quarter_2.month_3_target',
                             width: '20',
                             style: 'center',
                         },{
@@ -1275,17 +1260,17 @@ var targetPage = new Vue({
                             style: 'center',
                         },{
                             text: gettext("Month 7"),
-                            slug: 'months_target.quarter_3.month_1',
+                            slug: 'months_target.quarter_3.month_1_target',
                             width: '20',
                             style: 'center',
                         },{
                             text: gettext("Month 8"),
-                            slug: 'months_target.quarter_3.month_2',
+                            slug: 'months_target.quarter_3.month_2_target',
                             width: '20',
                             style: 'center',
                         },{
                             text: gettext("Month 9"),
-                            slug: 'months_target.quarter_3.month_3',
+                            slug: 'months_target.quarter_3.month_3_target',
                             width: '20',
                             style: 'center',
                         },{
@@ -1295,17 +1280,17 @@ var targetPage = new Vue({
                             style: 'center',
                         },{
                             text: gettext("Month 10"),
-                            slug: 'months_target.quarter_4.month_1',
+                            slug: 'months_target.quarter_4.month_1_target',
                             width: '20',
                             style: 'center',
                         },{
                             text: gettext("Month 11"),
-                            slug: 'months_target.quarter_4.month_2',
+                            slug: 'months_target.quarter_4.month_2_target',
                             width: '20',
                             style: 'center',
                         },{
                             text: gettext("Month 12"),
-                            slug: 'months_target.quarter_4.month_3',
+                            slug: 'months_target.quarter_4.month_3_target',
                             width: '20',
                             style: 'center',
                         },{
