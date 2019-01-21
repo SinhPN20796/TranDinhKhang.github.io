@@ -966,9 +966,16 @@ Vue.component('kpi-config', {
                 jqxhr.done(function (data, statusText, jqXHR) {
                     if (jqXHR.status != 200) {
                         swal(gettext('Not successful'), gettext('Cannot delay/active this kpi'), "error");
+                    }else {
+                        swal({
+                            type: 'success',
+                            title: gettext("Active KPI success"),
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
                     }
                 });
-                jqxhr.error(function (e) {
+                jqxhr.fail(function (e) {
                         if (e.responseJSON.message != "" || e.responseJSON.message != null || e.responseJSON.message != undefined) {
                             swal(gettext('Not successful'), e.responseJSON.message, "error");
                         }
@@ -1431,7 +1438,7 @@ Vue.component('delay-kpi-modal', {
             });
 
             // UI
-            jqxhr.error(function () {
+            jqxhr.fail(function () {
                 that.error_on_delayed = true;
                 that.error_on_delayed_message = gettext('You do not have permission to delay this KPI!')
             });
