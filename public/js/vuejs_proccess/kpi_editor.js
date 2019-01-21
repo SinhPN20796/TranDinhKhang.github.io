@@ -1308,13 +1308,26 @@ const EditKPIsWeightBaseModal =  {
         emit_update_parent_kpis_weight:function(){
             let that = this;
             let parent_kpis_with_weight_changed = that.get_parent_kpis_with_weight_changed();
-            if (parent_kpis_with_weight_changed.length > 0){
+            let change_weight = parent_kpis_with_weight_changed.map(function (kpi) {
+                return kpi.weight
+            });
+            let check_input_weight = change_weight.indexOf(0) == -1 ? false : true;
+            if (parent_kpis_with_weight_changed.length > 0 && !check_input_weight){
                 var jqxhr = that.update_parent_kpis_weight(parent_kpis_with_weight_changed);
                 jqxhr.done(function(){
                    that.hide_edit_kpis_weight_modal();
                 });
+            }else if(check_input_weight){
+                swal({
+                    type: 'error',
+                    title: gettext("Unsuccess"),
+                    text: gettext("Please deactive this KPI before you change KPI's weight to 0"),
+                    showConfirmButton: true,
+                    timer: 5000,
+                });
+            }else {
+                //notthing
             }
-
         },
 
         confirm_delay_kpi:function () {
