@@ -346,7 +346,8 @@ function remove_person(node, delete_kpis) {
             data: JSON.stringify({
                 id: node.id,
                 user_id: node.data.user_id,
-                delete_kpis: delete_kpis
+                delete_kpis: delete_kpis,
+                permanently_deleted: true
             }),
             url: "/api/user/delete/",
             beforeSend: function () {
