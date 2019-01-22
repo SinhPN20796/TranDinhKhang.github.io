@@ -1485,7 +1485,7 @@ Vue.component('kpi-owner', {
     },
     computed:{
         search_url: function () {
-            return '/api/v2/searchable_peoplelist/?&limit=10&from_kpi_id=' + this.kpi.id + '&search_term='
+            return '/api/v2/searchable_peoplelist/?&limit=10&search_assign=1&from_kpi_id=' + this.kpi.id + '&search_term='
 
         },
         is_able_to_change_owner: function () {
@@ -4350,11 +4350,13 @@ var v = new Vue({
         fetch_exscore: function () {
             var that = this;
             that.fetched_data_exscore_user = [];
+            var quarter_id = getUrlVars()['quarter_id'] || null;
             cloudjetRequest.ajax({
                 type: 'GET',
                 url: '/api/v2/exscore/',
                 data: {
                     user_id: that.user_id,
+                    quarter_id: quarter_id
                 },
                 success: function (data) {
                     var minus = [];
