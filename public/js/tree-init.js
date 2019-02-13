@@ -369,7 +369,7 @@ function remove_person(node, delete_kpis) {
                         clickOneNode(parent_node);
                     }
 
-                    peopleApp.get_list_backup_user();
+                    peopleApp.getAllBackupUser();
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
@@ -508,9 +508,9 @@ function send_email() {
     cloudjetRequest.ajax({
         type: 'POST',
         data: {
-            user_id: $("#id-user-id").val(),
-            username: $("#id-username").val(),
-            email: $("#id-email").val()
+            user_id: peopleApp.current_node.user_id,
+            username: peopleApp.current_node.username,
+            email: peopleApp.current_node.email
         },
         url: "/performance/people/reset-password/",
         beforeSend: function () {
