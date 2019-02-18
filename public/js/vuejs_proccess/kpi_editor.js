@@ -4147,6 +4147,7 @@ var v = new Vue({
         },
         confirm_adjust: function (elm) {
             var self = this;
+            let kpi_id = self.adjusting_kpi.id;
             cloudjetRequest.ajax({
                 type: 'post',
                 url: '/api/kpi/services/',
@@ -4165,9 +4166,9 @@ var v = new Vue({
                     res.enable_edit = enable_edit;
                     res.enable_review = enable_review;
                     res.enable_delete = enable_delete;
-                    self.$set(self.$data, 'kpi_list[' + self.adjusting_kpi.id + ']', res);
+                    self.$set(self.kpi_list, `${self.adjusting_kpi.id }`, res);
                     self.reset_adjust();
-
+                    self._reload_kpi(kpi_id, true, 0);
                 },
                 error: function (res) {
                 }
@@ -4272,8 +4273,8 @@ var v = new Vue({
             }
         },
         triggerClickTab: function(current_tab,e){
-            var self = this
-            self.$set('adjusting_kpi.adjusting_month',current_tab);
+            var self = this;
+            self.$set(self.adjusting_kpi,'adjusting_month',current_tab);
             self.update_adjusting_chart();
             self.checkConditon(e);
         },
