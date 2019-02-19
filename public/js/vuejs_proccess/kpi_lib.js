@@ -2,10 +2,14 @@ function getQtip() {
     Vue.directive('settooltip', function (el) {
         var text = "<div><span class='pd-bt-5'><strong>" + gettext('Measurement methods') + "</strong></span><br/>";
         var txt = $(el).children('.tooltip-content').text();
-        if (txt != null || txt.length > 0) {
+        if ((txt != null || txt.length > 0) && txt.length <= 1000) {
             txt = txt.trim();
             txt = '<span>' + txt + '</span>';
             txt = text + txt + '</div>';
+        }else {
+            txt = txt.trim();
+            txt = '<span>' + txt + '</span>';
+            txt = text + txt.substr(0,1000) + '...' + '</div>';
         }
         $(el).qtip({
             content: {
