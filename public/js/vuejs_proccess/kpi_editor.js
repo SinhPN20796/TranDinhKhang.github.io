@@ -3889,8 +3889,8 @@ var v = new Vue({
             // Chỉ admin mới có toàn quyền: Xoá, thêm.
             // Manager có quyền thêm.
             if (this.is_user_system) return 'admin';
-            else if (COMMON.isManager==='True') return 'manager';
-            return 'normal_user';
+            else if (COMMON.IsManager==='True') return 'manager';
+            else return 'normal_user';
         },
         reload_backup_kpi_list: function(is_remove=false){
             this.$set(this.employee_performance, 'month_1_backup', false);
