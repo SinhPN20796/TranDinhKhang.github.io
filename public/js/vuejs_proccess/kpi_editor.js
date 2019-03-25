@@ -1434,6 +1434,17 @@ Vue.component('point-calculation-methods-modal',{
     mounted() {
     },
     watch:{
+        estimated_result_with_threshold: {
+            handler: function(val, oldVal){
+              if (this.confirm_adjust){
+                  this.estimated_result_with_threshold = val;
+              }
+              if(this.reset_adjust){
+                  this.estimated_result_with_threshold = oldVal;
+              }
+            }
+        },
+
     },
     computed:{
         // adjust_min_performance: function () {
@@ -1508,7 +1519,6 @@ Vue.component('point-calculation-methods-modal',{
                 that.init_adjusting_chart();
             }
             let data = that.fetch_chart_data();
-
             that.adjusting_chart.data.datasets[1].data = data; // update performance chart
             if (that.adjusting_kpi.enable_estimation) {
                 that.adjusting_chart.data.datasets[0].data = [
@@ -1636,32 +1646,34 @@ Vue.component('point-calculation-methods-modal',{
             if (_month === 'quarter') {
                 _target = parseFloat(that.adjusting_kpi['target']);
             }
-            if (_result === null) { // calculate fof default values
-                _result = parseFloat(that.adjusting_kpi['month_' + _month]);
-                if (_month === 'quarter') {
-                    _result = parseFloat(that.adjusting_kpi['real']);
-                }
-            } // get result}
+            // Not set default in https://a.happyworking.life/project/fountainhead-cloudjet-kpi/us/6601
+            // if (_result === null) { // calculate fof default values
+            //     _result = parseFloat(that.adjusting_kpi['month_' + _month]);
+            //     if (_month === 'quarter') {
+            //         _result = parseFloat(that.adjusting_kpi['real']);
+            //     }
+            // } // get result}
             let _min = 0;
             let _max = 0;
             let _max_score = parseFloat(that.organization.max_score);
             let _operator = that.adjusting_kpi.operator;
 
-            if (_operator === '>=') {
-                _min = parseFloat(that.adjusting_kpi.achievement_calculation_method_extra[that.get_adjusting_key()].bottom); // get min target
-                _max = parseFloat(that.adjusting_kpi.achievement_calculation_method_extra[that.get_adjusting_key()].top); // get max target
-                let score = calculate_with_operator_greater();
-                if (score < 0) return (0.0).toFixed(2);
-                return score;
-            }
-            if (_operator === '<=') {
-                _min = parseFloat(that.adjusting_kpi.achievement_calculation_method_extra[that.get_adjusting_key()].top); // get min target
-                _max = parseFloat(that.adjusting_kpi.achievement_calculation_method_extra[that.get_adjusting_key()].bottom); // get max target
-                let score = calculate_with_operator_less();
-                if (score < 0) return (0.0).toFixed(2);
-                return score;
-            }
+            if (!$.isNumeric(_result)) return (0.0).toFixed(2);
 
+            if (_operator === '>=') {
+            _min = parseFloat(that.adjusting_kpi.achievement_calculation_method_extra[that.get_adjusting_key()].bottom); // get min target
+            _max = parseFloat(that.adjusting_kpi.achievement_calculation_method_extra[that.get_adjusting_key()].top); // get max target
+            let score = calculate_with_operator_greater();
+            if (score < 0) return (0.0).toFixed(2);
+            return score;
+        }
+            if (_operator === '<=') {
+            _min = parseFloat(that.adjusting_kpi.achievement_calculation_method_extra[that.get_adjusting_key()].top); // get min target
+            _max = parseFloat(that.adjusting_kpi.achievement_calculation_method_extra[that.get_adjusting_key()].bottom); // get max target
+            let score = calculate_with_operator_less();
+            if (score < 0) return (0.0).toFixed(2);
+            return score;
+        }
             function calculate_with_operator_greater() {
                 let score = (0.0).toFixed(2);
 
@@ -4829,22 +4841,24 @@ var v = new Vue({
             var dateParts = date.split("-");
             if (dateParts.length != 3)
                 return null;
-            var year = dateParts[0];
-            var month = dateParts[1];
-            var day = dateParts[2];
-            var date_c = new Date(year, month, day);
+            // var year = dateParts[0];
+            // var month = dateParts[1];
+            // var day = dateParts[2];
+            // var date_c = new Date(year, month, day);
             switch (format) {
                 case 'm':
-                    return gettext('Month') + ' ' + date_c.getMonth();
+                    return moment(date).format('['+ gettext('Year')+']'+ ' YYYY');
                     break;
                 case 'd':
-                    return gettext('Day') + ' ' + date_c.getDate();
+                    return moment(date).format('['+ gettext('Day')+']'+ ' DD');
                     break;
                 case 'y':
-                    return gettext('Year') + ' ' + date_c.getFullYear();
+                    return moment(date).format('['+ gettext('Year')+']'+ ' YYYY');
                     break;
                 case 'dmy':
-                    return gettext('Day') + ' ' + date_c.getDate() + ' ' + gettext('Month') + ' ' + date_c.getMonth() + ' ' + gettext('Year') + ' ' + date_c.getFullYear();
+                    //return gettext('Day') + ' ' + date_c.getDate() + ' ' + gettext('Month') + ' ' + date_c.getMonth() + ' ' + gettext('Year') + ' ' + date_c.getFullYear();
+                    //date_c.getDate() va date_c.getMonth() tra ve dang 0-->23 va 0-->11
+                    return moment(date).format('['+ gettext('Day')+']'+ ' DD ' + '[' + gettext('Month') + ']' + ' M ' +'[' + gettext('Year') + ']'+ ' YYYY')
                     break;
                 default:
                     return '';
@@ -4894,7 +4908,6 @@ var v = new Vue({
 
 
         },
-
 
         update_kpi: function (kpi, show_blocking_modal, callback) {
             var show_blocking_modal = (typeof show_blocking_modal !== 'undefined') ? show_blocking_modal : false;
