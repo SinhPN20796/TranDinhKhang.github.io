@@ -1444,17 +1444,6 @@ Vue.component('point-calculation-methods-modal',{
     mounted() {
     },
     watch:{
-        estimated_result_with_threshold: {
-            handler: function(val, oldVal){
-              if (this.confirm_adjust){
-                  this.estimated_result_with_threshold = val;
-              }
-              if(this.reset_adjust){
-                  this.estimated_result_with_threshold = oldVal;
-              }
-            }
-        },
-
     },
     computed:{
         // adjust_min_performance: function () {
@@ -1793,6 +1782,7 @@ Vue.component('point-calculation-methods-modal',{
         reset_adjust: function () {
             let that = this;
             that.adjusting_kpi = {};
+            that.estimated_result_with_threshold = '';
             that.dialogVisible = false;
             // Reset to month 1
 
@@ -4826,7 +4816,7 @@ var v = new Vue({
                         data[i]['zero'].forEach(function (e){
                            zero_score = parseFloat(that.employee_performance['month_'+i+'_score']);
                            e.month = i;
-                           e.employee_points = -zero_score;
+                           e.employee_points = zero_score;
                            minus[i] = -zero_score ;
                            plus[i] = 0;
                            that.fetched_data_exscore_user.push(e);
