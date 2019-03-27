@@ -123,7 +123,7 @@ Vue.mixin({
     data:function(){
         // https://stackoverflow.com/questions/40896261/apply-global-variable-to-vuejs
         return {
-
+            user_view_is_direct_manager:(COMMON.UserViewIsDirectManager == 'True')? true : false,
             is_user_system: (COMMON.IsAdmin == 'True' || COMMON.IsSupperUser == 'True') ? true : false,
             user_id: COMMON.OrgUserId,
             categories: [{
@@ -152,7 +152,15 @@ Vue.mixin({
         }
     },
     computed:{
+        permission_disable_edit_user_viewed_kpis: function(){
+            // check trường hợp lên xem cấp trên trực tiếp
+            if( !this.is_user_system && this.user_view_is_direct_manager){
+                return true
+            }else {
+                return false
+            }
 
+        }
     },
     methods: {
         to_percent: function (val, total) {
@@ -1422,6 +1430,8 @@ Vue.component('point-calculation-methods-modal',{
     ],
     data:function () {
         return{
+            is_error_adjust_top:false,
+            is_error_adjust_bottom:false,
             adjusting_kpi: {},
             adjusting_chart: null,
             estimated_result_with_threshold: '',
@@ -1794,8 +1804,10 @@ Vue.component('point-calculation-methods-modal',{
                     $('#error-input-1').css('display','');
                 else
                     $('#error-input-3').css('display','');
+                this.is_error_adjust_bottom = true
             }
             else {
+                this.is_error_adjust_bottom = false
                 if( id == '<=')
                     $('#error-input-1').css('display','none');
                 else
@@ -1809,33 +1821,38 @@ Vue.component('point-calculation-methods-modal',{
                     $('#error-input-2').css('display','');
                 else
                     $('#error-input-4').css('display','');
+                this.is_error_adjust_top= true;
             }
             else {
                 if( id == '<=')
                     $('#error-input-2').css('display','none');
                 else
                     $('#error-input-4').css('display','none');
+                this.is_error_adjust_top = false
             }
         },
         triggerClickTab: function(tab,e){
             let that = this;
             that.$set(that.adjusting_kpi,'adjusting_month',tab);
             that.update_adjusting_chart();
-            that.checkConditon(e);
+            setTimeout(function () {
+                that.checkConditon(e);
+            },500)
+
         },
         checkConditionInput1: function() {
             let that = this;
             let current_tab = $('.row.col-sm-12.evaluate-chart').find('.tab-pane.fade.in.active');
-            let target = parseFloat(current_tab.find('#input-2').val());
-            let input_1 =  parseFloat(current_tab.find('#input-1').val());
+            let target = parseFloat(current_tab.find('#input-2 .el-input__inner').val());
+            let input_1 =  parseFloat(current_tab.find('#input-1 .el-input__inner').val());
             that.checkInput1(input_1,target);
             that.update_adjusting_chart()
         },
         checkConditionInput3: function() {
             let that = this;
             let current_tab = $('.row.col-sm-12.evaluate-chart').find('.tab-pane.fade.in.active');
-            let target = parseFloat(current_tab.find('#input-2').val());
-            let input_3 = parseFloat(current_tab.find('#input-3').val());
+            let target = parseFloat(current_tab.find('#input-2 .el-input__inner').val());
+            let input_3 = parseFloat(current_tab.find('#input-3 .el-input__inner').val());
             that.checkInput3(input_3,target);
             that.update_adjusting_chart()
         },
@@ -1845,12 +1862,14 @@ Vue.component('point-calculation-methods-modal',{
             $('#error-input-2').css('display','none');
             $('#error-input-3').css('display','none');
             $('#error-input-4').css('display','none');
-            let id = $(e).find('a').attr('href');
-            let input_1 = parseFloat($(id).find('#input-1').val());
-            let target = parseFloat($(id).find('#input-2').val());
-            let input_3 = parseFloat($(id).find('#input-3').val());
-            that.checkInput1(input_1,target);
-            that.checkInput3(input_3,target);
+            // let id = $(e).find('a').attr('href');
+            // let input_1 = parseFloat($(id).find('#input-1 .el-input__inner').val());
+            // let target = parseFloat($(id).find('#input-2 .el-input__inner').val());
+            // let input_3 = parseFloat($(id).find('#input-3 .el-input__inner').val());
+            that.checkConditionInput1()
+            that.checkConditionInput3()
+            // that.checkInput1(input_1,target);
+            // that.checkInput3(input_3,target);
         },
         check_number: function(e){
             let charCode = e.which || e.keyCode; //It will work in chrome and firefox.
@@ -2540,6 +2559,7 @@ Vue.component('kpi-progressbar', {
         },
         disable_edit_target: function(kpi){
             if (this.is_user_system) return false;
+            if(this.permission_disable_edit_user_viewed_kpis) return true
             console.log("target:", kpi.id);
             return !(kpi.enable_edit && this.organization.allow_edit_monthly_target && this.organization.enable_to_edit);
 
@@ -2607,7 +2627,8 @@ Vue.component('kpi-progressbar', {
         },
         disable_review_kpi: function(parent_id, current_month){
             if (this.is_user_system) return false;
-            var is_manager = COMMON.UserId != COMMON.UserViewedId;
+            if(this.permission_disable_edit_user_viewed_kpis) return true
+            var is_manager = COMMON.IsManager == 'True'?true:false;
             var current_month_locked = !(this.can_edit_current_month(current_month, this.organization.monthly_review_lock));
             if (is_manager){ // if current Login user is parent of user viewed
                 return ( !this.organization.allow_manager_review || current_month_locked ) // manager can edit if enable_to_edit not pass
@@ -5384,9 +5405,10 @@ var v = new Vue({
 
         get_backups_list: function () {
             var that = this;
+            //var user_id = COMMON.UserViewedId
             cloudjetRequest.ajax({
                 type: 'get',
-                url: '/api/v2/user/backup_kpis/' + that.user_id + '/' + that.quarter_by_id.id,
+                url: '/api/v2/user/backup_kpis/' + COMMON.UserViewedId + '/' + that.quarter_by_id.id,
                 success: function (data) {
                     if ($.isArray(data)) {
                         that.backups_list = data;
