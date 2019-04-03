@@ -1,4 +1,4 @@
-/*
+    /*
   quocduan note: this method is the fucking trick,
 *  so, we should check later for the better way to archive what we want
 * */
@@ -854,7 +854,7 @@ methods: {
         self.check_file = true;
         var quarter_error = [];// mảng lưu quý bị lỗi
         var months_error = [];// mảng lưu tháng bị lỗi
-        cloudjetRequest.ajax({
+        let jqXhr = cloudjetRequest.ajax({
             type: "POST",
             url: '/api/kpis/import/validate',
             data: JSON.stringify(kpi),
@@ -1059,6 +1059,7 @@ methods: {
             contentType: "application/json"
 
         });
+        return jqXhr
         // self.$set(self.kpis, index, kpi);
     },
     to_string: function (value) {
@@ -1106,36 +1107,35 @@ methods: {
         kpi.check_error_quarter_4 = false;
     },
     confirm_edit_kpi: function (kpi) {
-        var self = this;
-        var kpi_validate = {}
-        self.resetErrorMsg(kpi.data)
+        let that = this;
+        let kpi_validate = {};
+        that.resetErrorMsg(kpi.data);
         kpi.data.msg = '';
-        self.validate_kpi(kpi.data)
-        setTimeout(function () {
+        let jqxhr = that.validate_kpi(kpi.data);
+        jqxhr.done(function () {
             if (!$('.text-muted').length) {
                 $("body.bg-sm").removeAttr("style");
-                self.info_msg_box.show_infor_msg = true;
-                if(self.data_edit_kpi.data.msg.length > 0){
-                    self.info_msg_box.type_msg = "error";
-                    self.info_msg_box.tite_msg = "Chỉnh sửa KPI không thành công"
-                    self.data_edit_kpi.data.msg.forEach(function (field) {
-                        self.info_msg_box.array_msg.push(field.field_name + ": " + field.message )
+                that.info_msg_box.show_infor_msg = true;
+                if(that.data_edit_kpi.data.msg.length > 0){
+                    that.info_msg_box.type_msg = "error";
+                    that.info_msg_box.tite_msg = "Chỉnh sửa KPI không thành công";
+                    that.data_edit_kpi.data.msg.forEach(function (field) {
+                        that.info_msg_box.array_msg.push(field.field_name + ": " + field.message )
                     })
 
                 }else{
-                    $('#edit-import-kpi').modal('hide')
-                    self.info_msg_box.type_msg = "success";
-                    self.info_msg_box.tite_msg = "Chỉnh sửa KPI thành công"
-                    self.info_msg_box.array_msg.push("Chỉnh sửa nhập dữ liệu KPI thành công !")
-                    self.$set(self.kpis, self.data_edit_kpi.data.index, self.data_edit_kpi.data);
+                    $('#edit-import-kpi').modal('hide');
+                    that.info_msg_box.type_msg = "success";
+                    that.info_msg_box.tite_msg = "Chỉnh sửa KPI thành công";
+                    that.info_msg_box.array_msg.push("Chỉnh sửa nhập dữ liệu KPI thành công !");
+                    that.$set(that.kpis, that.data_edit_kpi.data.index, that.data_edit_kpi.data)
                     setTimeout(function () {
-                        self.info_msg_box.show_infor_msg = false;
-                    },2000)
+                        that.info_msg_box.show_infor_msg = false;
+                    },1000)
                 }
-
                 return;
             }
-        }, 1000)
+        })
         // Không cần thiết vì đã có filter xử lý việc này => tránh lỗi chuyển data kpi.score_calculation_type
         // qua tiếng việt rồi lại qua tiếng anh chỉ để show lên xem
         //
