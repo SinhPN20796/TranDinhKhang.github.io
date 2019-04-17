@@ -1110,10 +1110,11 @@ methods: {
         let that = this;
         let kpi_validate = {};
         that.resetErrorMsg(kpi.data);
+        kpi.msg= '';
         kpi.data.msg = '';
         let jqxhr = that.validate_kpi(kpi.data);
         jqxhr.done(function () {
-            if (!$('.text-muted').length) {
+            // if (!$('.text-muted').length) {
                 $("body.bg-sm").removeAttr("style");
                 that.info_msg_box.show_infor_msg = true;
                 if(that.data_edit_kpi.data.msg.length > 0){
@@ -1124,17 +1125,17 @@ methods: {
                     })
 
                 }else{
-                    $('#edit-import-kpi').modal('hide');
+                    $("[data-dismiss=modal]").trigger({ type: "click" });
                     that.info_msg_box.type_msg = "success";
                     that.info_msg_box.tite_msg = "Chỉnh sửa KPI thành công";
                     that.info_msg_box.array_msg.push("Chỉnh sửa nhập dữ liệu KPI thành công !");
                     that.$set(that.kpis, that.data_edit_kpi.data.index, that.data_edit_kpi.data)
                     setTimeout(function () {
                         that.info_msg_box.show_infor_msg = false;
-                    },1000)
+                    },2000)
                 }
                 return;
-            }
+            // }
         })
         // Không cần thiết vì đã có filter xử lý việc này => tránh lỗi chuyển data kpi.score_calculation_type
         // qua tiếng việt rồi lại qua tiếng anh chỉ để show lên xem
