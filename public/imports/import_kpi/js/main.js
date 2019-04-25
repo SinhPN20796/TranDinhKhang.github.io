@@ -158,9 +158,7 @@ data: function () {
         check_file: true,
         data_edit_kpi: {
             data: {},
-            index: -1,
             check_error: false,
-            msg: [],
         },
         organization:{},
         file: {},
@@ -1075,9 +1073,9 @@ methods: {
     edit_kpi: function (index) {
         var that = this;
         that.data_edit_kpi.check_error = false;
-        that.data_edit_kpi.msg = that.kpis[index].msg;
+        that.data_edit_kpi.data.msg = that.kpis[index].msg;
         that.data_edit_kpi.data = JSON.parse(JSON.stringify(that.kpis[index]));
-        console.log(that.data_edit_kpi.data)
+        console.log(that.data_edit_kpi.data);
         if (that.data_edit_kpi.data.score_calculation_type.trim().toLowerCase() == '' || that.data_edit_kpi.data.score_calculation_type.trim().toLowerCase()=='most recent'){
             // {#that.data_edit_kpi.data.score_calculation_type = 'most_recent';#}
         }
@@ -1093,7 +1091,7 @@ methods: {
                 that.data_edit_kpi.data.score_calculation_type = ""
             }
         }
-        that.data_edit_kpi.index = index;
+        that.data_edit_kpi.data.index = index;
         setTimeout(function () {
             $('#edit-import-kpi').modal('show');
             $('.modal-dialog .modal-body').attr('style', 'max-height:' + parseInt(screen.height * 0.6) + 'px !important; overflow-y: auto');
@@ -1108,9 +1106,7 @@ methods: {
     },
     confirm_edit_kpi: function (kpi) {
         let that = this;
-        let kpi_validate = {};
         that.resetErrorMsg(kpi.data);
-        kpi.msg= '';
         kpi.data.msg = '';
         let jqxhr = that.validate_kpi(kpi.data);
         jqxhr.done(function () {
